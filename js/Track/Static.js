@@ -39,7 +39,7 @@ Genoverse.Track.Static = {
     
     this.stringified = features.toString();
     
-    return true;
+    return false;
   },
   
   getFeatures: function () {

@@ -705,8 +705,48 @@ var Genoverse = Base.extend({
         overlay = null;
       }
     }
-    
-    $.when.apply($, $.map(tracks, function (track) { return track.makeImage(start, end, width, left, browser.scrollStart); })).done(function () {
+        
+    $.when.apply($, $.map(tracks, function (track) {
+      var buffer = track.labelOverlay ? 0 : browser.labelBuffer;
+      var inc    = Math.round((browser.width / browser.scale));
+      var w      = track['static'] ? browser.width : width;
+      var s      = start;
+      var e      = end;
+      
+      var ds = [];
+      var d  = $.Deferred();
+      
+      $.when(track.getData(start, end)).done(function (data) {
+        if (track.allData) {
+          track.url = false;
+        }
+        
+        track.dataRegion.start = Math.min(start, track.dataRegion.start);
+        track.dataRegion.end   = Math.max(end,   track.dataRegion.end);
+        
+        while (w > 0) {
+          e = s + inc - 1;
+          
+          var bufferedStart = Math.max(s - buffer, 1);
+          var bounds        = { x: bufferedStart, y: 0, w: e - bufferedStart, h: 1 };
+          var features      = data.features ? track.parseFeatures(data, bounds) : data;
+          var def           = track.makeImage(features, s, e, browser.width, left, browser.scrollStart);
+         
+          if (def) {
+            ds.push(def);
+          }
+          
+          w -= browser.width;
+          s += inc;
+        }
+        
+        $.when.apply($, ds).done(function () {
+          d.resolve({ target: $.map(arguments, function (a) { return a.target; }), img: $.map(arguments, function (a) { return a.img; }) });
+        });
+      });
+      
+      return d;
+    })).done(function () {
       var redraw = false;
       
       $.when.apply($, $.map($.map(arguments, function (a) {

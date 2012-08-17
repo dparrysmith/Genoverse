@@ -4,16 +4,11 @@ Genoverse.Track.Stranded = {
       return;
     }
     
+    this.strand = 1;
+    
     this.base(config);
     
-    if (this.strand === -1) {
-      this.url        = false;
-      this._makeImage = this.makeReverseImage || this.makeImage;
-      this.makeImage  = $.noop;
-    } else {
-      this.strand       = 1;
-      this._makeImage   = this.makeImage;
-      this.makeImage    = this.makeForwardImage;
+    if (this.strand === 1) {
       this.reverseTrack = this.browser.setTracks([ $.extend({}, config, { strand: -1, forwardTrack: this }) ], this.browser.tracks.length)[0];
     }
     
@@ -26,12 +21,7 @@ Genoverse.Track.Stranded = {
   
   init: function () {
     this.base();
-    
-    if (this.strand === 1) {
-      this.reverseTrack.features = this.features;
-    } else {
-      this.features = this.forwardTrack.features;
-    }
+    this.gettingData = {};
   },
   
   positionFeatures: function (features, startOffset, imageWidth) {
@@ -39,16 +29,25 @@ Genoverse.Track.Stranded = {
     return this.base($.grep(features, function (feature) { return feature.strand === strand; }), startOffset, imageWidth);
   },
   
-  makeForwardImage: function () {
-    var args         = [].splice.call(arguments, 0);
-    var deferred     = $.Deferred();
-    var reverseTrack = this.reverseTrack;
+  getData: function (start, end) {
+    var deferred = $.Deferred();
+    var data;
     
-    $.when(this._makeImage.apply(this, args)).done(function (dfd) {
-      $.when(reverseTrack._makeImage.apply(reverseTrack, args.concat($.extend(true, {}, dfd.img)))).done(function (dfd2) {
-        deferred.resolve({ target: $.map([ dfd.target, dfd2.target ], function (t) { return t; }), img: [ dfd.img, dfd2.img ] }); // map flattens arrays if targets have labels and features
+    if (this.strand === 1) {
+      data = this.base.apply(this, arguments);
+      
+      if (data && typeof data.done === 'function')  {
+        deferred = data;
+      } else {
+        deferred.resolve($.extend(true, data.length ? [] : {}, data));
+      }
+      
+      this.reverseTrack.gettingData[start + ':' + end] = deferred;
+    } else {
+      this.gettingData[start + ':' + end].done(function (data) {
+        deferred.resolve($.extend(true, data.length ? [] : {}, data));
       });
-    });
+    }
     
     return deferred;
   },

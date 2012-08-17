@@ -49,6 +49,7 @@ Genoverse.Track = Base.extend({
     this.context        = this.canvas[0].getContext('2d');
     this.fontHeight     = parseInt(this.context.font, 10);
     this.labelUnits     = [ 'bp', 'Kb', 'Mb', 'Gb', 'Tb' ];
+    this.featureIds     = {};
     
     if (this.autoHeight === 'force') {
       this.autoHeight  = true;
@@ -298,16 +299,25 @@ Genoverse.Track = Base.extend({
     return this.urlParams.renderer;
   },
   
-  parseFeatures: function (data, bounds) {
+  parseFeatures: function (data, bounds, featureCallback) {
     var i = data.features.length;
     
     while (i--) {
-      data.features[i].sort        = i;
-      data.features[i].bounds      = {};
-      data.features[i].visible     = {};
-      data.features[i].bottom      = {};
-      data.features[i].labelBottom = {};
-      this.features.insert({ x: data.features[i].start, y: 0, w: data.features[i].end - data.features[i].start + 1, h: 1 }, data.features[i]);
+      data.features[i].sort        = data.features[i].sort        || i;
+      data.features[i].bounds      = data.features[i].bounds      || {};
+      data.features[i].visible     = data.features[i].visible     || {};
+      data.features[i].bottom      = data.features[i].bottom      || {};
+      data.features[i].labelBottom = data.features[i].labelBottom || {};
+      
+      if (typeof featureCallback === 'function') {
+        featureCallback.call(this, data.features[i]);
+      }
+      
+      if (!this.featureIds[data.features[i].id]) {
+        this.features.insert({ x: data.features[i].start, y: 0, w: data.features[i].end - data.features[i].start + 1, h: 1 }, data.features[i]);
+      }
+      
+      this.featureIds[data.features[i].id] = data.features[i];
     }
     
     if (this.allData) {
@@ -548,7 +558,7 @@ Genoverse.Track = Base.extend({
     return draw;
   },
   
-  makeImage: function (start, end, width, moved, cls) {
+  makeImage: function (data, start, end, width, moved, cls) {
     var div   = this.imgContainer.clone().width(width).addClass(cls);
     var prev  = $(this.imgContainers).filter('.' + this.browser.scrollStart + ':' + (moved < 0 ? 'first' : 'last'));
     var image = new Genoverse.TrackImage({
@@ -567,8 +577,8 @@ Genoverse.Track = Base.extend({
     this.container.append(this.imgContainers);
     
     var deferred = image.makeImage();
-    
-    this.getData(image, deferred);
+   
+    this.draw(image, data);
     
     if (this.thresholdMessage) {
       this.thresholdMessage.draw(div);
@@ -579,39 +589,22 @@ Genoverse.Track = Base.extend({
     return deferred;
   },
   
-  getData: function (image, deferred) {
+  getData: function (start, end) {
     if (this.threshold && this.browser.length > this.threshold) {
-      return this.draw(image, []);
+      return [];
     }
-  
-    var bounds   = { x: image.bufferedStart, y: 0, w: image.end - image.bufferedStart, h: 1 };
-    var features = !this.url || (image.start >= this.dataRegion.start && image.end <= this.dataRegion.end) ? this.features.search(bounds) : false;
+    
+    var bufferedStart = Math.max(start - (this.labelOverlay ? 0 : this.browser.labelBuffer), 1);
+    var bounds        = { x: bufferedStart, y: 0, w: end - bufferedStart, h: 1 };
+    var features      = !this.url || (start >= this.dataRegion.start && end <= this.dataRegion.end) ? this.features.search(bounds) : false;
     
     if (features) {
-      this.draw(image, features.sort(function (a, b) { return a.sort - b.sort; }));
+      return features.sort(function (a, b) { return a.sort - b.sort; });
     } else {
-      $.ajax({
+      return $.ajax({
         url      : this.url,
-        data     : this.getQueryString(image.bufferedStart, image.end),
-        dataType : this.dataType,
-        context  : this,
-        success  : function (data) {
-          if (this.allData) {
-            this.url = false;
-          }
-          
-          this.dataRegion.start = Math.min(image.start, this.dataRegion.start);
-          this.dataRegion.end   = Math.max(image.end,   this.dataRegion.end);
-          
-          try {
-            this.draw(image, this.parseFeatures(data, bounds));
-          } catch (e) {
-            this.showError(image, deferred, e + ' ' + e.fileName + ':' + e.lineNumber);
-          }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          this.showError(image, deferred, errorThrown.message);
-        }
+        data     : this.getQueryString(bufferedStart, end),
+        dataType : this.dataType
       });
     }
   },

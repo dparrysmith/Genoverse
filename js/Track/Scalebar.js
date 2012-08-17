@@ -132,24 +132,11 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     return features;
   },
   
-  makeReverseImage: function (start, end, width, moved, cls, img) {
-    var div      = this.imgContainer.clone().width(width).addClass(cls).css('left', img.container.position().left).data('img', img);
-    var deferred = $.Deferred();
-    
-    this.imgContainers[moved < 0 ? 'unshift' : 'push'](div[0]);
-    this.container.append(this.imgContainers);
-    
-    img.track     = this;
-    img.container = div;
-    
-    img.images.clone().appendTo(div).load(function (e) { deferred.resolve({ target: e.target, img: img }); }).data('deferred', deferred);
-    
-    div = null;
-    
-    return deferred;
+  getData: function (start, end) {
+    return this.setFeatures(start, end);
   },
   
-  getData: function (image, deferred) {
+  getData2: function (image, deferred) {
     this.setFeatures(image.start, image.end);
     this.base(image, deferred);
   },
