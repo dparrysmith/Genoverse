@@ -3,12 +3,60 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Genoverse by EugeneBragin</title>
+    <title>Genoverse HTML5 interactive genome browser</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <script type="text/javascript" src="js/combined.js">
+
+      {
+        container      : '#genoverse',
+        width          : 756,
+        chromosomeSize : 249250621, // chromosome 1, human
+        chr            : 1,
+        start          : 45467084,
+        end            : 45473455,
+
+        plugins        : [
+          'controlPanel',
+          'trackControls',
+          'resizer',
+        ],
+
+        tracks         : [
+          {
+            type : 'Scalebar',
+            height : 25,
+          },
+
+          {
+            type : 'Sequence',
+          },          
+
+          {
+            name    : 'Transcript',
+            type    : 'DAS.Transcript',
+            renderer: 'transcript',
+            filter  : {
+              type  : [ 'transcript', 'translation' ]
+            },
+            populateMenu: function (feature) {
+              return {
+                title: feature.label,
+                start: feature.start,
+                stop : feature.end,
+                Links: '<a href="#">e!</a>'
+              };
+            }
+          },
+
+        ]
+      }
+
+    </script>
 
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -41,7 +89,11 @@
 
 <h3>Example:</h3>
 
-<p>Example coming soon...</p>
+<p>
+  
+  <div id="genoverse"></div>
+
+</p>
 
 <h3>Code for this example:</h3>
 
