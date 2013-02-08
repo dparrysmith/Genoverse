@@ -19,7 +19,7 @@ body {
 }
 
 .wrapper {
-  width: 640px;
+  width: 768px;
   margin: 0 auto;
   background: #DEDEDE;
   -webkit-border-radius: 8px;
@@ -253,10 +253,11 @@ li pre {
   padding-left: 60px;
 }
 
-table {
+/*table {
   width: 100%;
   border-collapse: collapse;
 }
+*/
 
 th, td {
   text-align: left;
