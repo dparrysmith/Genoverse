@@ -57,11 +57,12 @@
     <span class="nt">&lt;/style&gt;</span>
 
     <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"js/combined.js"</span><span class="nt">&gt;</span>
-
+      <span class="c1">// Genoverse configuration</span>
       <span class="p">{</span>
-        <span class="nx">container</span>      <span class="o">:</span> <span class="s1">'#genoverse'</span><span class="p">,</span>
+        <span class="nx">container</span>      <span class="o">:</span> <span class="s1">'#genoverse'</span><span class="p">,</span> <span class="c1">// CSS/jQuery style for where to inject genoverse</span>
         <span class="nx">width</span>          <span class="o">:</span> <span class="mi">756</span><span class="p">,</span>
-        <span class="nx">chromosomeSize</span> <span class="o">:</span> <span class="mi">249250621</span><span class="p">,</span> <span class="c1">// chromosome 1, human</span>
+        <span class="nx">chromosomeSize</span> <span class="o">:</span> <span class="mi">249250621</span><span class="p">,</span>    <span class="c1">// chromosome 1, human</span>
+        <span class="c1">// Default location</span>
         <span class="nx">chr</span>            <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="nx">start</span>          <span class="o">:</span> <span class="mi">45467084</span><span class="p">,</span>
         <span class="nx">end</span>            <span class="o">:</span> <span class="mi">45473455</span><span class="p">,</span>
@@ -70,8 +71,10 @@
           <span class="s1">'controlPanel'</span><span class="p">,</span>
           <span class="s1">'trackControls'</span><span class="p">,</span>
           <span class="s1">'resizer'</span><span class="p">,</span>
+          <span class="s1">'tooltips'</span>
         <span class="p">],</span>
 
+        <span class="c1">// Now, the default track</span>
         <span class="nx">tracks</span>         <span class="o">:</span> <span class="p">[</span>
           <span class="p">{</span>
             <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Scalebar'</span><span class="p">,</span>
@@ -80,15 +83,22 @@
 
           <span class="p">{</span>
             <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Sequence'</span><span class="p">,</span>
+            <span class="c1">// Sequence source URL, with placeholders for chromosome, start and end positions, which would be automatically replaced for every AJAX request</span>
+            <span class="nx">url</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.reference/sequence?segment=__CHR__:__START__,__END__'</span><span class="p">,</span> 
+
           <span class="p">},</span>          
 
           <span class="p">{</span>
             <span class="nx">name</span>    <span class="o">:</span> <span class="s1">'Transcript'</span><span class="p">,</span>
             <span class="nx">type</span>    <span class="o">:</span> <span class="s1">'DAS.Transcript'</span><span class="p">,</span>
-            <span class="nx">renderer</span><span class="o">:</span> <span class="s1">'transcript'</span><span class="p">,</span>
+            <span class="c1">// For DAS tracks we use 'source' rather than just 'url', DAS tracks will workout url for the data and stylesheet</span>
+            <span class="nx">source</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.transcript'</span><span class="p">,</span>
             <span class="nx">filter</span>  <span class="o">:</span> <span class="p">{</span>
               <span class="nx">type</span>  <span class="o">:</span> <span class="p">[</span> <span class="s1">'transcript'</span><span class="p">,</span> <span class="s1">'translation'</span> <span class="p">]</span>
             <span class="p">},</span>
+            <span class="c1">// populateMenu invoked once user clicks on any feature of the track</span>
+            <span class="c1">// -&gt; feature that user clicks on (JSON object)</span>
+            <span class="c1">// &lt;- json for the menu items</span>
             <span class="nx">populateMenu</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
               <span class="k">return</span> <span class="p">{</span>
                 <span class="nx">title</span><span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span>
