@@ -213,10 +213,18 @@ li.sortHandle {
 
 .gv_menu table {
   width: 80%;
-  margin-right: 15%;
+  margin: 0 15% 0 0;
+  color: white;
   font-family: monospace;
   font-size: 12px;
   padding: 10px;
+  border: none;
+}
+
+.gv_menu table th, .gv_menu table td {
+  color: white;
+  padding: 0;
+  border: none
 }
 
 .gv_menu table .title {
