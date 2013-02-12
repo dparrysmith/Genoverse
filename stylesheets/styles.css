@@ -355,3 +355,7 @@ footer p + p {
     content: 'at http://github.com/';
   }
 }
+
+.fb_iframe_widget_lift {
+  z-index: 1000000!important;
+}

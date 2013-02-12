@@ -64,129 +64,143 @@
     <![endif]-->
   </head>
   <body>
+
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+
     <div class="wrapper">
-      <header>
-        <h1>Genoverse</h1>
-        <p>HTML5 interactive genome browser</p>
-        <p class="view"><a href="https://github.com/EugeneBragin/Genoverse">View the Project on GitHub <small>EugeneBragin/Genoverse</small></a></p>
-        <ul>
-          <li><a href="https://github.com/EugeneBragin/Genoverse/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/EugeneBragin/Genoverse/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/EugeneBragin/Genoverse">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h3>What is it?</h3>
 
-<p>Genoverse is a portable, customizable, back-end independent JavaScript and HTML5 based genome browser which allows the user to explore data interactively</p>
+    <header>
+      <h1>Genoverse</h1>
+      <p>HTML5 interactive genome browser</p>
+      <p class="view"><a href="https://github.com/EugeneBragin/Genoverse">View the Project on GitHub <small>EugeneBragin/Genoverse</small></a></p>
 
-<h3>Example:</h3>
-<p>
-  <div id="genoverse"></div>
-</p>
+      <div class="fb-like" data-href="http://eugenebragin.github.com/Genoverse/" data-send="false" data-width="450" data-show-faces="false"></div>
+      
+      <ul>
+        <li><a href="https://github.com/EugeneBragin/Genoverse/zipball/master">Download <strong>ZIP File</strong></a></li>
+        <li><a href="https://github.com/EugeneBragin/Genoverse/tarball/master">Download <strong>TAR Ball</strong></a></li>
+        <li><a href="https://github.com/EugeneBragin/Genoverse">View On <strong>GitHub</strong></a></li>
+      </ul>
+    </header>
+    <section>
+    <h3>What is it?</h3>
 
-<h3>What's so good about it?</h3>
-<p>Apart from looking cool and being interactive, it can easily be installed to any website and connected to your data source with a few lines of javascript, just like google maps or other web widget. More information coming soon, currently do <a style="font-weight:bold; text-decoration: underline;" href="mailto:info@genoverse.org?subject=Hey guys, genoverse is awesome, but...">let us know if you have any questions/ideas or simply need help</a></p>
+    <p>Genoverse is a portable, customizable, back-end independent JavaScript and HTML5 based genome browser which allows the user to explore data interactively</p>
 
-<h3>Code for this example:</h3>
-<div class="highlight"><pre><span class="cp">&lt;!DOCTYPE HTML&gt;</span>
-<span class="nt">&lt;html&gt;</span>
-  <span class="nt">&lt;head&gt;</span>
+    <h3>Example:</h3>
+    <p>
+      <div id="genoverse"></div>
+    </p>
 
-    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"js/combined.js"</span><span class="nt">&gt;</span>
-      <span class="c1">// Genoverse configuration</span>
-      <span class="p">{</span>
-        <span class="nx">container</span>      <span class="o">:</span> <span class="s1">'#genoverse'</span><span class="p">,</span> <span class="c1">// CSS/jQuery style for where to inject genoverse</span>
-        <span class="nx">width</span>          <span class="o">:</span> <span class="mi">756</span><span class="p">,</span>
-        <span class="nx">chromosomeSize</span> <span class="o">:</span> <span class="mi">249250621</span><span class="p">,</span>    <span class="c1">// chromosome 1, human</span>
-        <span class="c1">// Default location</span>
-        <span class="nx">chr</span>            <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="nx">start</span>          <span class="o">:</span> <span class="mi">45467084</span><span class="p">,</span>
-        <span class="nx">end</span>            <span class="o">:</span> <span class="mi">45473455</span><span class="p">,</span>
+    <h3>What's so good about it?</h3>
+    <p>Apart from looking cool and being interactive, it can easily be installed to any website and connected to your data source with a few lines of javascript, just like google maps or other web widget. More information coming soon, currently do <a style="font-weight:bold; text-decoration: underline;" href="mailto:info@genoverse.org?subject=Hey guys, genoverse is awesome, but...">let us know if you have any questions/ideas or simply need help</a></p>
 
-        <span class="nx">plugins</span>        <span class="o">:</span> <span class="p">[</span>
-          <span class="s1">'controlPanel'</span><span class="p">,</span>
-          <span class="s1">'trackControls'</span><span class="p">,</span>
-          <span class="s1">'resizer'</span><span class="p">,</span>
-          <span class="s1">'tooltips'</span>
-        <span class="p">],</span>
+    <h3>Code for this example:</h3>
+    <div class="highlight"><pre><span class="cp">&lt;!DOCTYPE HTML&gt;</span>
+    <span class="nt">&lt;html&gt;</span>
+      <span class="nt">&lt;head&gt;</span>
 
-        <span class="c1">// Tracks configuration</span>
-        <span class="nx">tracks</span>         <span class="o">:</span> <span class="p">[</span>
+        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"js/combined.js"</span><span class="nt">&gt;</span>
+          <span class="c1">// Genoverse configuration</span>
           <span class="p">{</span>
-            <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Scalebar'</span><span class="p">,</span>
-            <span class="nx">height</span> <span class="o">:</span> <span class="mi">25</span><span class="p">,</span>
-          <span class="p">},</span>
+            <span class="nx">container</span>      <span class="o">:</span> <span class="s1">'#genoverse'</span><span class="p">,</span> <span class="c1">// CSS/jQuery style for where to inject genoverse</span>
+            <span class="nx">width</span>          <span class="o">:</span> <span class="mi">756</span><span class="p">,</span>
+            <span class="nx">chromosomeSize</span> <span class="o">:</span> <span class="mi">249250621</span><span class="p">,</span>    <span class="c1">// chromosome 1, human</span>
+            <span class="c1">// Default location</span>
+            <span class="nx">chr</span>            <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">start</span>          <span class="o">:</span> <span class="mi">45467084</span><span class="p">,</span>
+            <span class="nx">end</span>            <span class="o">:</span> <span class="mi">45473455</span><span class="p">,</span>
 
-          <span class="p">{</span>
-            <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Sequence'</span><span class="p">,</span>
-            <span class="c1">// Sequence source URL, with placeholders for chromosome, start and end positions, which would be automatically replaced for every AJAX request</span>
-            <span class="nx">url</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.reference/sequence?segment=__CHR__:__START__,__END__'</span><span class="p">,</span> 
+            <span class="nx">plugins</span>        <span class="o">:</span> <span class="p">[</span>
+              <span class="s1">'controlPanel'</span><span class="p">,</span>
+              <span class="s1">'trackControls'</span><span class="p">,</span>
+              <span class="s1">'resizer'</span><span class="p">,</span>
+              <span class="s1">'tooltips'</span>
+            <span class="p">],</span>
 
-          <span class="p">},</span>          
+            <span class="c1">// Tracks configuration</span>
+            <span class="nx">tracks</span>         <span class="o">:</span> <span class="p">[</span>
+              <span class="p">{</span>
+                <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Scalebar'</span><span class="p">,</span>
+                <span class="nx">height</span> <span class="o">:</span> <span class="mi">25</span><span class="p">,</span>
+              <span class="p">},</span>
 
-          <span class="p">{</span>
-            <span class="nx">name</span>    <span class="o">:</span> <span class="s1">'Transcript'</span><span class="p">,</span>
-            <span class="nx">type</span>    <span class="o">:</span> <span class="s1">'DAS.Transcript'</span><span class="p">,</span>
-            <span class="c1">// For DAS tracks we use 'source' rather than just 'url', DAS tracks will workout url for the data and stylesheet</span>
-            <span class="nx">source</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.transcript'</span><span class="p">,</span>
-            <span class="nx">filter</span>  <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">type</span>  <span class="o">:</span> <span class="p">[</span> <span class="s1">'transcript'</span><span class="p">,</span> <span class="s1">'translation'</span> <span class="p">]</span>
-            <span class="p">},</span>
-            <span class="c1">// populateMenu invoked once user clicks on any feature of the track</span>
-            <span class="c1">// -&gt; feature that user clicks on (JSON object)</span>
-            <span class="c1">// &lt;- json for the menu items</span>
-            <span class="nx">populateMenu</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
-              <span class="k">return</span> <span class="p">{</span>
-                <span class="nx">title</span><span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span>
-                <span class="nx">start</span><span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">start</span><span class="p">,</span>
-                <span class="nx">stop</span> <span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">end</span><span class="p">,</span>
-                <span class="nx">Links</span><span class="o">:</span> <span class="s1">'&lt;a href="#"&gt;e!&lt;/a&gt;'</span>
-              <span class="p">};</span>
-            <span class="p">}</span>
-          <span class="p">},</span>
+              <span class="p">{</span>
+                <span class="nx">type</span> <span class="o">:</span> <span class="s1">'Sequence'</span><span class="p">,</span>
+                <span class="c1">// Sequence source URL, with placeholders for chromosome, start and end positions, which would be automatically replaced for every AJAX request</span>
+                <span class="nx">url</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.reference/sequence?segment=__CHR__:__START__,__END__'</span><span class="p">,</span> 
 
-        <span class="p">]</span>
-      <span class="p">}</span>
+              <span class="p">},</span>          
 
-    <span class="nt">&lt;/script&gt;</span>
+              <span class="p">{</span>
+                <span class="nx">name</span>    <span class="o">:</span> <span class="s1">'Transcript'</span><span class="p">,</span>
+                <span class="nx">type</span>    <span class="o">:</span> <span class="s1">'DAS.Transcript'</span><span class="p">,</span>
+                <span class="c1">// For DAS tracks we use 'source' rather than just 'url', DAS tracks will workout url for the data and stylesheet</span>
+                <span class="nx">source</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.transcript'</span><span class="p">,</span>
+                <span class="nx">filter</span>  <span class="o">:</span> <span class="p">{</span>
+                  <span class="nx">type</span>  <span class="o">:</span> <span class="p">[</span> <span class="s1">'transcript'</span><span class="p">,</span> <span class="s1">'translation'</span> <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="c1">// populateMenu invoked once user clicks on any feature of the track</span>
+                <span class="c1">// -&gt; feature that user clicks on (JSON object)</span>
+                <span class="c1">// &lt;- json for the menu items</span>
+                <span class="nx">populateMenu</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">feature</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="k">return</span> <span class="p">{</span>
+                    <span class="nx">title</span><span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span>
+                    <span class="nx">start</span><span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">start</span><span class="p">,</span>
+                    <span class="nx">stop</span> <span class="o">:</span> <span class="nx">feature</span><span class="p">.</span><span class="nx">end</span><span class="p">,</span>
+                    <span class="nx">Links</span><span class="o">:</span> <span class="s1">'&lt;a href="#"&gt;e!&lt;/a&gt;'</span>
+                  <span class="p">};</span>
+                <span class="p">}</span>
+              <span class="p">},</span>
 
+            <span class="p">]</span>
+          <span class="p">}</span>
 
-  <span class="nt">&lt;/head&gt;</span>
-  <span class="nt">&lt;body&gt;</span>
-
-  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"genoverse"</span><span class="nt">&gt;&lt;/div&gt;</span>
-
-  <span class="nt">&lt;/body&gt;</span>
-<span class="nt">&lt;/html&gt;</span>
-</pre></div>
-
-
-<h3>How does it work?</h3>
-<p>Data is loaded dynamically via AJAX and visualized inside your web browser using HTML5 CANVAS element</p>
-<p>Genoverse works with a variety of formats, such as XML, JSON or delimited text files, and can be customized to parse and display any data source as required.</p>
+        <span class="nt">&lt;/script&gt;</span>
 
 
-<p>Authors: <a href="https://github.com/SimonBrent">Simon Brent</a> &amp;&amp; <a href="https://github.com/EugeneBragin">Eugene Bragin</a></p>
-<p>Contributors: <a href="https://github.com/andrewtikhonov">Andrew Tikhonov</a></p>
+      <span class="nt">&lt;/head&gt;</span>
+      <span class="nt">&lt;body&gt;</span>
 
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/EugeneBragin">EugeneBragin</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-34315286-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+      <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"genoverse"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+      <span class="nt">&lt;/body&gt;</span>
+    <span class="nt">&lt;/html&gt;</span>
+    </pre></div>
+
+
+    <h3>How does it work?</h3>
+    <p>Data is loaded dynamically via AJAX and visualized inside your web browser using HTML5 CANVAS element</p>
+    <p>Genoverse works with a variety of formats, such as XML, JSON or delimited text files, and can be customized to parse and display any data source as required.</p>
+
+
+    <p>Authors: <a href="https://github.com/SimonBrent">Simon Brent</a> &amp;&amp; <a href="https://github.com/EugeneBragin">Eugene Bragin</a></p>
+    <p>Contributors: <a href="https://github.com/andrewtikhonov">Andrew Tikhonov</a></p>
+
+    </section>
+  </div>
+  <footer>
+    <p>Project maintained by <a href="https://github.com/EugeneBragin">EugeneBragin</a></p>
+    <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+  </footer>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+  <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+  <script type="text/javascript">
+    try {
+      var pageTracker = _gat._getTracker("UA-34315286-1");
+    pageTracker._trackPageview();
+    } catch(err) {}
+  </script>
 
   </body>
 </html>
