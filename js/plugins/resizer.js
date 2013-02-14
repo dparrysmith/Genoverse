@@ -49,3 +49,4 @@ Genoverse.Track.on('afterToggleExpander', function () {
 Genoverse.on('afterMove afterZoomIn afterZoomOut', function () {
   $('.resizer', this.wrapper).css('left', -this.left);
 });
+
