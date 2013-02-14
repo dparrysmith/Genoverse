@@ -20,13 +20,24 @@ var Genoverse = Base.extend({
   
   constructor: function (config) {
     if (!this.supported()) {
-      this.die('Your browser does not support this functionality');
+      return this.die('                                           \
+        <p>Your browser does not support this functionality.</p>  \
+        <p>Supported browsers are:                                \
+          <ul>                                                    \
+            <li>Chrome 21</li>                                    \
+            <li>Firefox 14</li>                                   \
+            <li>Internet Explorer 9</li>                          \
+            <li>Safari 5.1</li>                                   \
+          </ul>                                                   \
+          and later versions. Please update your browser.         \
+        </p>                                                      \
+      ', config.container);
     }
     
     $.extend(this, this.defaults, config);
     
     if (!(this.container && this.container.length)) {
-      this.die('You must supply a ' + (this.container ? 'valid ' : '') + 'container element');
+      return this.die('You must supply a ' + (this.container ? 'valid ' : '') + 'container element');
     }
     
     for (var key in this) {
@@ -132,25 +143,14 @@ var Genoverse = Base.extend({
         }
       }
     }, '.image_container, .overlay, .selector');
-
-    $(document).on({
-      mouseup   : $.proxy(this.mouseup,   this),
-      mousemove : $.proxy(this.mousemove, this),
-      keydown   : $.proxy(this.keydown,   this),
-      keyup     : $.proxy(this.keyup,     this)
-    });
     
     this.selectorControls.on('click', function (e) {
-      var left  = browser.selector.position().left;
-      var width = browser.selector.outerWidth(true);
-      var start = Math.round(left / browser.scale) + browser.start;
-      var end   = Math.round((left + width) / browser.scale) + browser.start - 1;
-          end   = end <= start ? start : end;
+      var pos = browser.getSelectorPosition();
       
       switch (e.target.className) {
-        case 'zoomHere' : browser.setRange(start, end, true); break;
-        case 'center'   : browser.startDragScroll(); browser.move(null, browser.width / 2 - (left + width / 2), 'fast', $.proxy(browser.stopDragScroll, browser)); break;
-        case 'summary'  : browser.summary(start, end); break;
+        case 'zoomHere' : browser.setRange(pos.start, pos.end, true); break;
+        case 'center'   : browser.startDragScroll(); browser.move(null, browser.width / 2 - (pos.left + pos.width / 2), 'fast', $.proxy(browser.stopDragScroll, browser)); break;
+        case 'summary'  : browser.summary(pos.start, pos.end); break;
         case 'cancel'   : browser.cancelSelect(); break;
         default         : break;
       }
@@ -160,15 +160,14 @@ var Genoverse = Base.extend({
       $(this).parent().fadeOut('fast');
     });
     
-    if (this.useHash) {
-      $(window).on('hashchange', function () {  
-        browser.popState();
-      });
-    } else {
-      window.onpopstate = function () {
-        browser.popState();
-      };
-    }
+    $(document).on({
+      'mouseup.genoverse'   : $.proxy(this.mouseup,   this),
+      'mousemove.genoverse' : $.proxy(this.mousemove, this),
+      'keydown.genoverse'   : $.proxy(this.keydown,   this),
+      'keyup.genoverse'     : $.proxy(this.keyup,     this)
+    });
+    
+    $(window).on(this.useHash ? 'hashchange.genoverse' : 'popstate.genoverse', $.proxy(this.popState, this));
   },
   
   reset: function () {
@@ -181,10 +180,29 @@ var Genoverse = Base.extend({
     this.scale   = 9e99; // arbitrary value so that setScale resets track scales as well
     this.history = {};
     
+    delete this.prev.history;
+    
     this.setRange(this.start, this.end);
     this.makeImage();
   },
-
+  
+  setWidth: function (width) {
+    var i = this.tracks.length;
+    
+    this.width       = width;
+    this.wrapperLeft = this.labelWidth - width;
+    this.width      -= this.labelWidth;
+    
+    this.menuContainer.width(width - this.labelWidth - 1);
+    this.container.width(width);
+    
+    while (i--) {
+      this.tracks[i].setWidth(this.width);
+    }
+    
+    this.reset();
+  },
+  
   mousewheelZoom: function (e, delta) {
     var browser = this;
     
@@ -238,7 +256,6 @@ var Genoverse = Base.extend({
     if (update !== false) {
       if (this.start !== this.dragStart) {
         this.updateURL();
-        this.setHistory();
         this.redraw();
       }
       
@@ -396,6 +413,25 @@ var Genoverse = Base.extend({
     var wrapperOffset = this.wrapper.offset().left;
     var start, end, step;
     
+    function afterMove() {
+      $('.expander', this.wrapper).css('left', -this.left);
+      $('.image_container img.static', this.container).css('marginLeft', function () { return wrapperOffset - $(this.parentNode).offset().left; });
+      
+      this.setRange(start, end);
+      
+      if (this.redraw()) {
+        step = this.left - this.prev.left > 0 ? 1 : -1;
+        
+        this.stopDragScroll(e, false);
+        this.startDragScroll(e);
+        this.move(false, step); // Force the scroll on 1px in order to ensure the URL updates correctly (otherwise it might not if scrolling a very small amount on the boundary)
+      }
+      
+      if (typeof callback === 'function') {
+        callback();
+      }
+    }
+    
     this.left = e ? e.pageX - this.dragOffset : this.left + delta;
     
     if (this.scale > 1) {
@@ -426,32 +462,13 @@ var Genoverse = Base.extend({
         $('.overlay', this.wrapper).add('.menu', this.menuContainer).stop().animate({ marginLeft: this.left - this.prev.left }, speed).add(
           this.selector.stop().animate({ marginLeft: this.left - this.prev.left - 1 }, speed)
         )
-      )).done(function () {
-        if (typeof callback === 'function') {
-          callback();
-        }
-      });
+      )).done($.proxy(afterMove, this));
     } else {
       $('.track_container', this.container).css('left', this.left);
       $('.overlay', this.wrapper).add('.menu', this.menuContainer).css('marginLeft', this.left - this.prev.left);
       this.selector.css('marginLeft', this.left - this.prev.left - 1);
       
-      if (typeof callback === 'function') {
-        callback();
-      }
-    }
-    
-    $('.expander', this.wrapper).css('left', -this.left);
-    $('.image_container img.static', this.container).css('marginLeft', function () { return wrapperOffset - $(this.parentNode).offset().left; });
-    
-    this.setRange(start, end);
-    
-    if (this.redraw()) {
-      step = this.left - this.prev.left > 0 ? 1 : -1;
-      
-      this.stopDragScroll(e, false);
-      this.startDragScroll(e);
-      this.move(false, step); // Force the scroll on 1px in order to ensure the URL updates correctly (otherwise it might not if scrolling a very small amount on the boundary)
+      afterMove.call(this);
     }
   },
   
@@ -487,6 +504,7 @@ var Genoverse = Base.extend({
         track.heightToggler[track.autoHeight ? 'addClass' : 'removeClass']('auto_height');
         
         track.resize(((track.config || {}).height || track.defaults.height) + track.spacing);
+        track.initialHeight = track.height;
       }
     }
   },
@@ -510,14 +528,6 @@ var Genoverse = Base.extend({
     var start = Math.round(this.start - x / this.scale);
     var end   = this.length === 1 ? start + 1 : Math.round(start + 2 * (this.length - 1));
     
-    if (start < 1) {
-      start = 1;
-    }
-    
-    if (end > this.chromosomeSize) {
-      end = this.chromosomeSize;
-    }
-    
     this.setRange(start, end, true);
   },
   
@@ -534,24 +544,14 @@ var Genoverse = Base.extend({
   setRange: function (start, end, update, force) {
     this.prev.start = this.start;
     this.prev.end   = this.end;
-    this.start      = typeof start === 'number' ? Math.floor(start) : parseInt(start, 10);
-    this.end        = typeof end   === 'number' ? Math.floor(end)   : parseInt(end,   10);
-    
-    if (this.start < 1) {
-      this.start = 1;
-    }
-    
-    if (this.end > this.chromosomeSize) {
-      this.end = this.chromosomeSize;
-    }
-    
-    this.length = this.end - this.start + 1;
+    this.start      = Math.max(typeof start === 'number' ? Math.floor(start) : parseInt(start, 10), 1);
+    this.end        = Math.min(typeof end   === 'number' ? Math.floor(end)   : parseInt(end,   10), this.chromosomeSize);
+    this.length     = this.end - this.start + 1;
     
     this.setScale(force);
     
     if (update === true && (this.prev.start !== this.start || this.prev.end !== this.end)) {
       this.updateURL();
-      this.setHistory();
       this.makeImage();
     }
   },
@@ -733,11 +733,9 @@ var Genoverse = Base.extend({
     this.dataRegion.end   = Math.max(end,   this.dataRegion.end);
     this.offsets[dir]    += width;
     
-    if (this.updateFromHistory()) {
-      return;
+    if (!this.updateFromHistory()) {
+      this.makeTrackImages(this.tracks, start, end, width);
     }
-    
-    this.makeTrackImages(this.tracks, start, end, width);
   },
   
   makeTrackImages: function (tracks, start, end, width) {
@@ -805,15 +803,15 @@ var Genoverse = Base.extend({
   },
   
   updateURL: function () {
-    if (!this.urlParamTemplate) {
-      return;
+    if (this.urlParamTemplate) {
+      if (this.useHash) {
+        window.location.hash = this.getQueryString();
+      } else {
+        window.history.pushState({}, '', this.getQueryString());
+      }
     }
     
-    if (this.useHash) {
-      window.location.hash = this.getQueryString();
-    } else {
-      window.history.pushState({}, '', this.getQueryString());
-    }
+    this.setHistory();
   },
   
   setHistory: function (dataRegion, offsets) {
@@ -858,7 +856,7 @@ var Genoverse = Base.extend({
   
   updateFromHistory: function () {
     var history = this.history[this.start + '-' + this.end];
-    
+     
     if (history && (this.prev.start !== this.start || this.prev.end !== this.end)) {
       var images = $('.track_container .' + history.scrollStart, this.container);
       
@@ -867,7 +865,7 @@ var Genoverse = Base.extend({
         
         $('.track_container', this.container).css('left', history.left).children('.image_container').hide();
         
-        $.extend(this, history);
+        $.extend(true, this, history);
         
         if (newTracks.length) {
           this.makeTrackImages(newTracks);
@@ -915,9 +913,14 @@ var Genoverse = Base.extend({
     return !!(elem.getContext && elem.getContext('2d'));
   },
   
-  die: function (error) {
-    alert(error);
-    throw(error);
+  die: function (error, el) {
+    if (el && el.length) {
+      el.html(error);
+    } else {
+      alert(error);
+    }
+    
+    this.failed = true;
   },
   
   menuTemplate: $('               \
@@ -959,7 +962,17 @@ var Genoverse = Base.extend({
     
     return menu;
   },
-
+  
+  getSelectorPosition: function () {
+    var left  = this.selector.position().left;
+    var width = this.selector.outerWidth(true);
+    var start = Math.round(left / this.scale) + this.start;
+    var end   = Math.round((left + width) / this.scale) + this.start - 1;
+        end   = end <= start ? start : end;
+    
+    return { start: start, end: end, left: left, width: width };
+  },
+  
   // Provide summary of a region (as a popup menu)
   summary: function (start, end) {
     alert(
@@ -968,7 +981,7 @@ var Genoverse = Base.extend({
       'End: '   + end   + "\n"
     );
   },
-
+  
   /**
    * functionWrap - wraps event handlers and adds debugging functionality
    **/

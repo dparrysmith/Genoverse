@@ -48,7 +48,7 @@ Genoverse.Track = Base.extend({
     this.menus          = $();
     this.context        = this.canvas[0].getContext('2d');
     this.fontHeight     = parseInt(this.context.font, 10);
-    this.labelUnits     = [ 'bp', 'Kb', 'Mb', 'Gb', 'Tb' ];
+    this.labelUnits     = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
     
     if (this.autoHeight === 'force') {
       this.autoHeight  = true;
@@ -120,16 +120,18 @@ Genoverse.Track = Base.extend({
   
   init: function () {
     if (this.renderer) {
-      this.urlParams.renderer = this.renderer;
-      this.featuresByRenderer = {};
-      this.features           = this.featuresByRenderer[this.renderer] = new RTree();
+      this.urlParams.renderer   = this.renderer;
+      this.featuresByRenderer   = {};
+      this.featureIdsByRenderer = {};
+      this.features             = this.featuresByRenderer[this.renderer]   = new RTree();
+      this.featureIds           = this.featureIdsByRenderer[this.renderer] = {};
     } else {
-      this.features = new RTree();
+      this.features   = new RTree();
+      this.featureIds = {};
     }
     
-    this.dataRegion    = { start: 9e99, end: -9e99 };
+    this.dataRegions   = {};
     this.scaleSettings = {};
-    this.featureIds    = {};
   },
   
   reset: function () {
@@ -165,7 +167,7 @@ Genoverse.Track = Base.extend({
   
   checkSize: function () {
     if (this.threshold && this.browser.length > this.threshold) {
-      this.fullVisibleHeight = 0;
+      this.fullVisibleHeight = this.thresholdMessage ? this.thresholdMessage.height * 2 : 0;
       return;
     }
     
@@ -237,6 +239,10 @@ Genoverse.Track = Base.extend({
     this.browser.tracks.splice(this.index, 1);
   },
   
+  setWidth: function (width) {
+    this.width = width;
+  },
+  
   setScale: function () {
     var track = this;
     var featurePositions, labelPositions;
@@ -288,25 +294,18 @@ Genoverse.Track = Base.extend({
   setRenderer: function (renderer, permanent) {
     if (this.urlParams.renderer !== renderer) {
       this.urlParams.renderer = renderer;
-      this.dataRegion = { start: 9e99, end: -9e99 };
-      
-      if (!this.featuresByRenderer[renderer]) {
-        this.featuresByRenderer[renderer] = new RTree();
-      }
-      
-      this.features = this.featuresByRenderer[renderer];
+      this.dataRegions        = {};
+      this.features           = (this.featuresByRenderer[renderer]   = this.featuresByRenderer[renderer]   || new RTree());
+      this.featureIds         = (this.featureIdsByRenderer[renderer] = this.featureIdsByRenderer[renderer] || {});
     }
     
     if (permanent && this.renderer !== renderer) {
       this.renderer = renderer;
       
-      var browser = this.browser;
-      var img     = $(this.imgContainers).filter(browser.left > 0 ? ':first' : ':last').data('img');
-      
-      if (img) {
+      if ($(this.imgContainers).filter(this.browser.left > 0 ? ':first' : ':last').data('img')) {
         this.reset();
         this.setScale();
-        browser.makeTrackImages([ this ]);
+        this.browser.makeTrackImages([ this ]);
       }
     }
   },
@@ -605,11 +604,10 @@ Genoverse.Track = Base.extend({
       return this.draw(image, []);
     }
     
-    var bounds   = { x: image.bufferedStart, y: 0, w: image.end - image.bufferedStart, h: 1 };
-    var features = !this.url || (image.start >= this.dataRegion.start && image.end <= this.dataRegion.end) ? this.features.search(bounds) : false;
+    var bounds = { x: image.bufferedStart, y: 0, w: image.end - image.bufferedStart, h: 1 };
     
-    if (features) {
-      this.draw(image, features.sort(function (a, b) { return a.sort - b.sort; }));
+    if (this.checkDataRegion(image)) {
+      this.draw(image, this.features.search(bounds).sort(function (a, b) { return a.sort - b.sort; }));
     } else {
       $.ajax({
         url      : this.url,
@@ -617,8 +615,7 @@ Genoverse.Track = Base.extend({
         dataType : this.dataType,
         context  : this,
         success  : function (data) {
-          this.dataRegion.start = Math.min(image.start, this.dataRegion.start);
-          this.dataRegion.end   = Math.max(image.end,   this.dataRegion.end);
+          this.setDataRegion(image);
           
           try {
             this.draw(image, this.parseFeatures(data, bounds));
@@ -635,6 +632,58 @@ Genoverse.Track = Base.extend({
         }
       });
     }
+  },
+  
+  setDataRegion: function (image) {
+    var sorted   = $.map(this.dataRegions, function (e, s) { return parseInt(s, 10); }).sort(function (a, b) { return a - b; });
+    var i        = sorted.length;
+    var toDelete = {};
+    var done     = false;
+    var start, end;
+    
+    while (i--) {
+      start = sorted[i];
+      end   = this.dataRegions[start];
+      
+      if (start === image.bufferedStart && end === image.end) {
+        continue;
+      }
+      
+      // New region and old region have the same start, or new region overlaps old region to the right. Must be done first as this.dataRegions[start] is altered, and is used in the second check.
+      if (start === image.bufferedStart || image.bufferedStart < end && image.end > end) {
+        this.dataRegions[start] = Math.max(end, image.end);
+        done = true;
+      }
+      
+      // New region and old region have the same end, or new region overlaps old region to the left
+      if (end === image.end || image.bufferedStart < start && image.end > start) {
+        this.dataRegions[image.bufferedStart] = Math.max(this.dataRegions[image.bufferedStart] || 0, this.dataRegions[start]);
+        toDelete[start] = true;
+        done = true;
+      }
+    }
+    
+    for (i in toDelete) {
+      delete this.dataRegions[i];
+    }
+    
+    if (!done) {
+      this.dataRegions[image.bufferedStart] = image.end;
+    }
+  },
+  
+  checkDataRegion: function (image) {
+    if (!this.url) {
+      return true;
+    }
+    
+    for (var i in this.dataRegions) {
+      if (image.start >= parseInt(i, 10) && image.end <= this.dataRegions[i]) {
+        return true;
+      }
+    }
+    
+    return false;
   },
   
   showError: function (image, deferred, error) {
