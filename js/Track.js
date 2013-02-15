@@ -609,7 +609,7 @@ Genoverse.Track = Base.extend({
     if (this.checkDataRegion(image)) {
       this.draw(image, this.features.search(bounds).sort(function (a, b) { return a.sort - b.sort; }));
     } else {
-      $.ajax({
+      this.fetchFeatures = $.ajax({
         url      : this.url,
         data     : this.getQueryString(image.bufferedStart, image.end),
         dataType : this.dataType,
@@ -629,6 +629,9 @@ Genoverse.Track = Base.extend({
         },
         error: function (jqXHR, textStatus, errorThrown) {
           this.showError(image, deferred, errorThrown.message);
+        },
+        complete: function () {
+          this.fetchFeatures = false;
         }
       });
     }
@@ -678,7 +681,7 @@ Genoverse.Track = Base.extend({
     }
     
     for (var i in this.dataRegions) {
-      if (image.start >= parseInt(i, 10) && image.end <= this.dataRegions[i]) {
+      if (Math.max(image.start, 1) >= parseInt(i, 10) && Math.min(image.end, this.browser.chromosomeSize) <= this.dataRegions[i]) {
         return true;
       }
     }
