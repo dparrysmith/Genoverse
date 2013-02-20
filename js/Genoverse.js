@@ -237,7 +237,7 @@ var Genoverse = Base.extend({
   },
 
   startDragScroll: function (e) {
-    this.dragging   = true;
+    this.dragging   = 'scroll';
     this.scrolling  = !e;
     this.prev.left  = this.left;
     this.dragOffset = e ? e.pageX - this.left : 0;
@@ -270,7 +270,7 @@ var Genoverse = Base.extend({
     
     var x = Math.max(0, e.pageX - this.wrapper.offset().left - 2);
     
-    this.dragging        = true;
+    this.dragging        = 'select';
     this.selectorStalled = false;
     this.selectorStart   = x;
     
@@ -384,7 +384,7 @@ var Genoverse = Base.extend({
       return false;
     }
     
-    switch (this.dragAction) {
+    switch (this.dragging) {
       case 'select' : this.stopDragSelect(e);         break;
       case 'scroll' : this.stopDragScroll(e, update); break;
       default       : break;
