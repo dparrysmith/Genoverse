@@ -892,7 +892,7 @@ var Genoverse = Base.extend({
       var tmp = this.match(/^(CHR|START|END)$/);
       
       if (tmp) {
-        coords[tmp[1].toLowerCase()] = match[i++];
+        coords[tmp[1].toLowerCase()] = tmp[1] === 'CHR' ? match[i++] : parseInt(match[i++], 10);
       }
     });
     
