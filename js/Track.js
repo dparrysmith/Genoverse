@@ -648,18 +648,19 @@ Genoverse.Track = Base.extend({
       start = sorted[i];
       end   = this.dataRegions[start];
       
-      if (start === image.bufferedStart && end === image.end) {
+      if ((start === image.bufferedStart && end === image.end) || (start < image.bufferedStart && end > image.end)) {
+        done = true;
         continue;
       }
       
       // New region and old region have the same start, or new region overlaps old region to the right. Must be done first as this.dataRegions[start] is altered, and is used in the second check.
-      if (start === image.bufferedStart || image.bufferedStart < end && image.end > end) {
+      if (start === image.bufferedStart || image.bufferedStart <= end && image.end >= end) {
         this.dataRegions[start] = Math.max(end, image.end);
         done = true;
       }
       
       // New region and old region have the same end, or new region overlaps old region to the left
-      if (end === image.end || image.bufferedStart < start && image.end > start) {
+      if (end === image.end || image.bufferedStart <= start && image.end >= start) {
         this.dataRegions[image.bufferedStart] = Math.max(this.dataRegions[image.bufferedStart] || 0, this.dataRegions[start]);
         toDelete[start] = true;
         done = true;
