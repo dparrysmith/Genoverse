@@ -249,6 +249,14 @@ Genoverse.Track = Base.extend({
     
     this.scale = this.browser.scale;
     
+    if (this.renderer) {
+      var renderer = this.getRenderer();
+      
+      if (renderer !== this.urlParams.renderer) {
+        this.setRenderer(renderer);
+      }
+    }
+    
     // Reset scaleSettings if the user has zoomed back to a previously existent zoom level, but has scrolled to a new region.
     // This is needed to get the newly created images in the right place.
     // Sadly we have to throw away all other images generated at this zoom level for it to work, 
@@ -279,14 +287,6 @@ Genoverse.Track = Base.extend({
     $.each([ 'featurePositions', 'labelPositions', 'imgContainers', 'heights' ], function () {
       track[this] = scaleSettings[this];
     });
-    
-    if (this.renderer) {
-      var renderer = this.getRenderer();
-      
-      if (renderer !== this.urlParams.renderer) {
-        this.setRenderer(renderer);
-      }
-    }
     
     this.container.css('left', this.browser.left).children('.image_container').hide();
   },
@@ -421,7 +421,7 @@ Genoverse.Track = Base.extend({
                 
                 if ((this[j ? 'labelPositions' : 'featurePositions'].search(bounds[j])[0] || feature).id !== feature.id) {
                   bounds[j].y += bounds[j].h;
-                  bump      = true;
+                  bump         = true;
                 }
               } while (bump);
             }
