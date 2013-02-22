@@ -371,7 +371,7 @@ Genoverse.Track = Base.extend({
       end        = feature.scaledEnd   - startOffset;
       bounds     = feature.bounds[scaleKey];
       labelStart = start;
-      labelWidth = feature.label ? Math.ceil(this.context.measureText(feature.label).width) + 1 : 0;
+      labelWidth = feature.label && showLabels ? Math.ceil(this.context.measureText(feature.label).width) + 1 : 0;
       
       if (bounds) {
         width      = bounds[0].w   - this.featureSpacing;
@@ -397,8 +397,7 @@ Genoverse.Track = Base.extend({
           }
         }
         
-        maxIndex = bounds.length - 1;
-        
+        maxIndex     = bounds.length - 1;
         bounds[0].h += this.separateLabels ? 0 : maxIndex;
         
         if (this.bump) {
