@@ -349,7 +349,7 @@ Genoverse.Track = Base.extend({
   },
   
   positionFeatures: function (features, startOffset, imageWidth) {
-    var feature, start, end, x, y, width, originalWidth, bounds, bump, depth, j, k, labelStart, labelWidth, maxIndex;
+    var feature, start, end, x, y, width, originalWidth, featureHeight, featureSpacing, bounds, bump, bumpFeature, depth, j, k, labelStart, labelWidth, maxIndex;
     var showLabels   = this.forceLabels === true || !(this.maxLabelRegion && this.browser.length > this.maxLabelRegion);
     var height       = 0;
     var labelsHeight = 0;
@@ -367,14 +367,16 @@ Genoverse.Track = Base.extend({
       
       seen[feature.id] = 1;
       
-      start      = feature.scaledStart - startOffset;
-      end        = feature.scaledEnd   - startOffset;
-      bounds     = feature.bounds[scaleKey];
-      labelStart = start;
-      labelWidth = feature.label && showLabels ? Math.ceil(this.context.measureText(feature.label).width) + 1 : 0;
+      start          = feature.scaledStart - startOffset;
+      end            = feature.scaledEnd   - startOffset;
+      bounds         = feature.bounds[scaleKey];
+      labelStart     = start;
+      labelWidth     = feature.label && showLabels ? Math.ceil(this.context.measureText(feature.label).width) + 1 : 0;
+      featureHeight  = feature.height  || this.featureHeight;
+      featureSpacing = feature.spacing || this.featureSpacing;
       
       if (bounds) {
-        width      = bounds[0].w   - this.featureSpacing;
+        width      = bounds[0].w   - featureSpacing;
         maxIndex   = bounds.length - 1;
       } else {
         width = end - start + scale;
@@ -386,14 +388,14 @@ Genoverse.Track = Base.extend({
         }
         
         x      = feature.scaledStart;
-        y      = feature.y ? feature.y * (this.featureHeight + this.bumpSpacing) : 0;
-        bounds = [{ x: x, y: y, w: width + this.featureSpacing, h: this.featureHeight + this.bumpSpacing }];
+        y      = feature.y ? feature.y * (featureHeight + this.bumpSpacing) : 0;
+        bounds = [{ x: x, y: y, w: width + featureSpacing, h: featureHeight + this.bumpSpacing }];
         
         if (feature.label && showLabels && !this.labelOverlay && this.forceLabels !== 'off' && !(scale > 1 && start < -this.browser.labelBuffer)) {
           if (this.separateLabels) {
             bounds.push({ x: x, y: y, w: labelWidth, h: this.fontHeight + 2 });
           } else {
-            bounds.push({ x: x, y: y + this.featureHeight + this.bumpSpacing + 1, w: Math.max(labelWidth, width + this.featureSpacing), h: this.fontHeight + 2 });
+            bounds.push({ x: x, y: y + featureHeight + this.bumpSpacing + 1, w: Math.max(labelWidth, width + featureSpacing), h: this.fontHeight + 2 });
           }
         }
         
@@ -416,10 +418,11 @@ Genoverse.Track = Base.extend({
                   break;
                 }
                 
-                bump = false;
+                bump        = false;
+                bumpFeature = this[j ? 'labelPositions' : 'featurePositions'].search(bounds[j])[0] || feature;
                 
-                if ((this[j ? 'labelPositions' : 'featurePositions'].search(bounds[j])[0] || feature).id !== feature.id) {
-                  bounds[j].y += bounds[j].h;
+                if (bumpFeature.id !== feature.id) {
+                  bounds[j].y += bumpFeature.bounds[scaleKey][j].h;
                   bump         = true;
                 }
               } while (bump);
@@ -437,12 +440,14 @@ Genoverse.Track = Base.extend({
               bump = false;
               j    = bounds.length;
               
-              while (j--) {              
-                if ((this.featurePositions.search(bounds[j])[0] || feature).id !== feature.id) {
+              while (j--) {
+                bumpFeature = this.featurePositions.search(bounds[j])[0] || feature;
+                
+                if (bumpFeature.id !== feature.id) {
                   k = bounds.length;
                   
                   while (k--) {
-                    bounds[k].y += bounds[j].h; // bump both feature and label by the height of the current bounds
+                    bounds[k].y += bumpFeature.bounds[scaleKey][j].h; // bump both feature and label by the height of the current bounds
                   }
                   
                   bump = true;
@@ -496,18 +501,18 @@ Genoverse.Track = Base.extend({
       
       originalWidth = width;
       
-      // truncate features in very small regions (where scale > 1) - make the features start at 1px outside the canvas to ensure no lines are drawn at the borders incorrectly
-      if (scale > 1 && start < end && (start < 0 || end > imageWidth)) {
+      // truncate features - make the features start at 1px outside the canvas to ensure no lines are drawn at the borders incorrectly
+      if (start < end && (start < 0 || end > imageWidth)) {
         start = Math.max(start, -1);
         end   = Math.min(end, imageWidth + 1);
         width = end - start + scale;
       }
       
       if (width > 0) {
-        draw.fill[feature.color].push([ 'fillRect', [ start, bounds[0].y, width, this.featureHeight ] ]);
+        draw.fill[feature.color].push([ 'fillRect', [ start, bounds[0].y, width, featureHeight ] ]);
         
         if (feature.borderColor) {
-          draw.border[feature.borderColor].push([ 'strokeRect', [ start, bounds[0].y + 0.5, width, this.featureHeight ] ]);
+          draw.border[feature.borderColor].push([ 'strokeRect', [ start, bounds[0].y + 0.5, width, featureHeight ] ]);
         }
       }
       
