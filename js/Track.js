@@ -572,7 +572,7 @@ Genoverse.Track = Base.extend({
     return draw;
   },
   
-  makeImage: function (start, end, width, moved, cls) {
+  makeImage: function (start, end, width, moved, cls, makeOverlay) {
     var div   = this.imgContainer.clone().width(width).addClass(cls);
     var prev  = $(this.imgContainers).filter('.' + this.browser.scrollStart + ':' + (moved < 0 ? 'first' : 'last'));
     var image = new Genoverse.TrackImage({
@@ -583,7 +583,7 @@ Genoverse.Track = Base.extend({
       width       : width,
       scaledStart : start * this.scale,
       background  : this.browser.colors.background,
-      overlay     : this.browser.overlay ? $() : this.browser.makeOverlay(width, this)
+      overlay     : makeOverlay ? this.browser.makeOverlay(width, this) : $()
     });
     
     div.css('left', prev.length ? prev.position().left + (moved < 0 ? -this.width : prev.width()) : -this.browser.offsets.right);

@@ -754,17 +754,16 @@ var Genoverse = Base.extend({
     var dataRegion = $.extend({}, this.dataRegion);
     var offsets    = $.extend({}, this.offsets);
     var allTracks  = tracks.length === this.tracks.length;
-    
-    this.overlay = allTracks ? this.makeOverlay(width) : false;
+    var overlay    = allTracks ? this.makeOverlay(width) : false;
     
     function removeOverlay() {
-      if (browser.overlay) {
-        browser.overlay.remove();
-        browser.overlay = null;
+      if (overlay) {
+        overlay.remove();
+        overlay = null;
       }
     }
     
-    $.when.apply($, $.map(tracks, function (track) { return track.makeImage(start, end, width, left, browser.scrollStart); })).done(function () {
+    $.when.apply($, $.map(tracks, function (track) { return track.makeImage(start, end, width, left, browser.scrollStart, !allTracks); })).done(function () {
       var redraw = false;
       
       $.when.apply($, $.map($.map(arguments, function (a) {
