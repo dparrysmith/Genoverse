@@ -754,12 +754,13 @@ var Genoverse = Base.extend({
     var dataRegion = $.extend({}, this.dataRegion);
     var offsets    = $.extend({}, this.offsets);
     var allTracks  = tracks.length === this.tracks.length;
-    var overlay    = this.makeOverlays(width, allTracks ? false : tracks);
+    
+    this.overlay = allTracks ? this.makeOverlay(width) : false;
     
     function removeOverlay() {
-      if (overlay) {
-        overlay.remove();
-        overlay = null;
+      if (browser.overlay) {
+        browser.overlay.remove();
+        browser.overlay = null;
       }
     }
     
@@ -772,7 +773,7 @@ var Genoverse = Base.extend({
       }), function (i) {
         if (i.track.backgrounds && !allTracks) {
           i.track.scaleFeatures(i.track.backgrounds);
-          redraw = true;
+          return redraw = true; // Don't draw backgrounds in this case, as updateTracks will take care of this
         }
         
         return i.drawBackground();
@@ -789,14 +790,13 @@ var Genoverse = Base.extend({
     }).fail(removeOverlay);
   },
   
-  makeOverlays: function (width, tracks) {
-    var overlay = $('<div class="overlay">').css({ left: this.left && !tracks ? (width - (Math.abs(this.left) % width)) * (width > Math.abs(this.left) || this.left > 0 ? -1 : 1) : -this.offsets.right, width: width });
+  makeOverlay: function (width, track) {
+    var overlay = $('<div class="overlay">').css({ left: this.left && !track ? (width - (Math.abs(this.left) % width)) * (width > Math.abs(this.left) || this.left > 0 ? -1 : 1) : -this.offsets.right, width: width });
     
-    if (tracks) {
-      overlay = $($.map(
-        $.map(tracks, function (t) { return [ t, t.forwardTrack || t.reverseTrack ]; }),
-        function (track) { return track ? overlay.clone().addClass('track').css({ top: track.container.position().top, height: track.height })[0] : false; }
-      ));
+    if (track) {
+      overlay = $($.map([ track, track.forwardTrack || track.reverseTrack ], function (t) {
+        return t ? overlay.clone().addClass('track').css({ top: t.container.position().top, height: t.height })[0] : false;
+      }));
     }
     
     return overlay.prependTo(this.wrapper);

@@ -118,6 +118,7 @@ Genoverse.TrackImage = Base.extend({
     var backgrounds = $();
     var deferred    = $.Deferred();
     var heights     = this.track.backgrounds ? [ Math.max(this.track.fullHeight, this.track.minLabelHeight), 1 ] : [ 1 ];
+    var overlay     = this.overlay;
     
     for (var i = 0; i < heights.length; i++) {
       this.track.canvas.attr({ width: this.width, height: heights[i] });
@@ -132,7 +133,12 @@ Genoverse.TrackImage = Base.extend({
     
     $.when.apply($, backgrounds.map(function () {
       var dfd = $.Deferred();
-      $(this).load(dfd.resolve);
+      
+      $(this).load(function () {
+        dfd.resolve();
+        overlay.remove();
+      });
+        
       return dfd;
     }).toArray()).done(deferred.resolve);
     
