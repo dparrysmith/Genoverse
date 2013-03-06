@@ -1062,7 +1062,7 @@ var Genoverse = Base.extend({
         return coords;
     }
 
-    //try {
+    try {
       var match  = ((this.useHash ? window.location.hash.replace(/^#/, '?') ||
           window.location.search : window.location.search) + '&').match(this.paramRegex).slice(2, -1);
 
@@ -1075,9 +1075,9 @@ var Genoverse = Base.extend({
           coords[tmp[1].toLowerCase()] = match[i++];
         }
       });
-    //} catch(e) {
+    } catch(e) {
 
-    //}
+    }
 
     return coords;
   },
