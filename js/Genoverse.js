@@ -442,12 +442,12 @@ var Genoverse = Base.extend({
       }
     }
     
-    if (this.left < this.minLeft) {
+    if (this.left <= this.minLeft) {
       this.left = this.minLeft;
       
       start = this.chromosomeSize - this.length + 1;
       end   = this.chromosomeSize;
-    } else if (this.left > this.maxLeft) {
+    } else if (this.left >= this.maxLeft) {
       this.left = this.maxLeft;
       
       start = 1;
