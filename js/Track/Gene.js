@@ -72,7 +72,7 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
       
       if (expanded && i && feature.exons[i - 1].id !== feature.exons[i].id) {
         this.drawIntron($.extend({}, exon, {
-          start : feature.x + (feature.exons[i - 1].end - feature.start) * scale,
+          start : feature.x + (feature.exons[i - 1].end - feature.start) * scale + add,
           end   : feature.x + (feature.exons[i].start   - feature.start) * scale,
           y     : feature.y + this.featureHeight / 2,
           y2    : feature.y + (feature.strand > 0 ? 0 : this.featureHeight),
