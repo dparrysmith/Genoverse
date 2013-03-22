@@ -298,6 +298,16 @@ Genoverse.Track = Base.extend({
     this.left  = 0;
     this.scale = this.browser.scale;
     
+    if (this.maxLabelRegion) {
+      if (this.maxLabelRegion < this.browser.length) {
+        this._labels = this.labels;
+        this.labels  = false;
+      } else if (typeof this._labels !== 'undefined') {
+        this.labels = this._labels;
+        delete this._labels;
+      }
+    }
+    
     if (this.labels && this.labels !== 'overlay') {
       this.dataBuffer.start = Math.max(this.dataBuffer.start, this.browser.labelBuffer);
     }
@@ -714,16 +724,15 @@ Genoverse.Track = Base.extend({
   
   render: function (features, img) {
     var params         = img.data();
-    var labels         = this.labels && this.maxLabelRegion && this.maxLabelRegion < this.browser.length ? false : this.labels;
         features       = this.positionFeatures(this.scaleFeatures(features, params.scale), params); // positionFeatures alters params.featureHeight, so this must happen before the canvases are created
     var featureCanvas  = $('<canvas />').attr({ width: params.width, height: params.featureHeight || 1 });
-    var labelCanvas    = labels === 'separate' && params.labelHeight ? featureCanvas.clone().attr('height', params.labelHeight) : featureCanvas;
+    var labelCanvas    = this.labels === 'separate' && params.labelHeight ? featureCanvas.clone().attr('height', params.labelHeight) : featureCanvas;
     var featureContext = featureCanvas[0].getContext('2d');
     var labelContext   = labelCanvas[0].getContext('2d');
     
     featureContext.font = labelContext.font = this.font;
     
-    switch (labels) {
+    switch (this.labels) {
       case false     : break;
       case 'overlay' : labelContext.textAlign = 'center'; labelContext.textBaseline = 'middle'; break;
       default        : labelContext.textAlign = 'left';   labelContext.textBaseline = 'top';    break;
