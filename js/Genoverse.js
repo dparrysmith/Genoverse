@@ -498,7 +498,6 @@ var Genoverse = Base.extend({
     
     if (update === true && (this.prev.start !== this.start || this.prev.end !== this.end)) {
       this.updateURL();
-      this.makeImage();
     }
   },
   
@@ -525,17 +524,6 @@ var Genoverse = Base.extend({
         
         while (i--) {
           this.tracks[i].setScale();
-        }
-        
-        if (this.backgrounds) {
-          for (var c in this.backgrounds) {
-            i = this.backgrounds[c].length;
-            
-            while (i--) {
-              this.backgrounds[c][i].scaledStart = this.backgrounds[c][i].start * this.scale;
-              this.backgrounds[c][i].scaledEnd   = this.backgrounds[c][i].end   * this.scale;
-            }
-          }
         }
       }
     }
@@ -651,53 +639,23 @@ var Genoverse = Base.extend({
   addTracks: function (tracks) {
     this.setTracks(tracks, this.tracks.length);
     this.sortTracks();
+    this.updateTracks();
   },
   
   removeTracks: function (tracks) {
-    var i      = tracks.length;
-    var redraw = false;
-    var track, j, k, bg;
-    
-    tracks.sort(function (a, b) { return a.index - b.index; }); // tracks must be ordered low to high by index for splice to work correctly (splice is done in track.remove())
+    var i = tracks.sort(function (a, b) { return a.index - b.index; }).length; // tracks must be ordered low to high by index for splice to work correctly (splice is done in track.remove())
     
     while (i--) {
-      track = tracks[i];
-      j     = track.backgrounds ? track.backgrounds.length : 0;
-      
-      while (j--) {
-        bg = this.backgrounds[track.backgrounds[j].background];
-        k  = bg.length;
-        
-        while (k--) {
-          if (bg[k] === track.backgrounds[j]) {
-            bg.splice(k, 1);
-            redraw = true;
-            break;
-          }
-        }
-        
-        if (bg.length === 0) {
-          delete this.backgrounds[track.backgrounds[j].background];
-        }
-      }
-      
-      track.remove();
+      tracks[i].remove();
     }
     
-    this.updateTracks(redraw);
+    this.updateTracks();
   },
   
-  updateTracks: function (redrawBackground) {
+  updateTracks: function () {
     var i = this.tracks.length;
     
     while (i--) {
-      // redraw all backgrounds if a track which contributed to this.backgrounds has been added removed
-      if (redrawBackground) {
-        $(this.tracks[i].imgContainers).each(function () {
-          $(this).children('.bg').remove().end().data('img').drawBackground();
-        });
-      }
-      
       // correct track index
       if (this.tracks[i].index !== i) {
         this.tracks[i].index = i;
