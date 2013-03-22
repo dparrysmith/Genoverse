@@ -6,11 +6,21 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
   
   resize: $.noop,
   
+  setScale: function () {
+    this.scaleline = false;
+    this.base();
+  },
+  
+  render: function () {
+    this.base.apply(this, arguments);
+    this.drawnScale = this.scale;
+  },
+  
   positionFeatures: function (features, params) {
-    if (params.positioned) {
-      return features;
-    } else if (this.scale === this.drawnScale) {
+    if (this.scale === this.drawnScale) {
       return false;
+    } else if (this.scaleline) {
+      return this.scaleline;
     }
     
     var text   = this.formatLabel(this.browser.length);
@@ -18,7 +28,7 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
     var width1 = this.context.measureText(text).width;
     var width2 = this.context.measureText(text2).width;
     
-    features = [
+    this.scaleline = [
       { x: 0,                                       y: this.height / 2, width: (this.width - width1 - 10) / 2,            height: 1 },
       { x: width1 + (this.width - width1 + 10) / 2, y: this.height / 2, width: ((this.width - width1) / 2) - width2 - 45, height: 1 },
       { x: this.width - 30,                         y: this.height / 2, width: 5,                                         height: 1, decorations: true },
@@ -26,11 +36,7 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
       { x: this.width - width2 - 35,                y: 2,               width: width2,                                    height: 0, color: '#FFFFFF', labelColor: this.color, label: text2 }
     ];
     
-    this.drawnScale = this.scale;
-    
-    params.positioned = true;
-    
-    return this.base(features, params);
+    return this.base(this.scaleline, params);
   },
   
   decorateFeature: function (feature, context, scale) {

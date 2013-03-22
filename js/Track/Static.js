@@ -30,17 +30,20 @@ Genoverse.Track.Static = {
   
   makeImage: function (params) {
     var features = this.positionFeatures(this.findFeatures(params.start, params.end), params);
-    var string   = JSON.stringify(features);
     
-    if (this.stringified !== string) {
-      params.width         = this.width;
-      params.featureHeight = this.height;
+    if (features) {
+      var string = JSON.stringify(features);
       
-      this.render(features, this.image.data(params));
-      this.imgContainer.children(':last').show();
-      this.resize(this.featuresHeight);
-      
-      this.stringified = string;
+      if (this.stringified !== string) {
+        params.width         = this.width;
+        params.featureHeight = this.height;
+        
+        this.render(features, this.image.data(params));
+        this.imgContainer.children(':last').show();
+        this.resize(this.featuresHeight);
+        
+        this.stringified = string;
+      }
     }
     
     return $.Deferred().resolve();
