@@ -377,10 +377,12 @@ Genoverse.Track = Base.extend({
   },
   
   /**
-  * parseData(data) - parse raw data from the data source (e.g. online web service)
+  * parseData(data, start, end) - parse raw data from the data source (e.g. online web service)
   * extract features and insert it into the internal features storage (RTree)
   *
-  * >> data - raw data from the data source (e.g. ajax response)
+  * >> data  - raw data from the data source (e.g. ajax response)
+  * >> start - start location of the data
+  * >> end   - end   location of the data
   * << nothing
   *
   * every feature extracted this routine must construct a hash with at least 3 values:
@@ -393,12 +395,12 @@ Genoverse.Track = Base.extend({
   *
   * and call this.insertFeature(feature)
   */
-  parseData: function (data) {
+  parseData: function (data, start, end) {
     // Example of parseData function when data is an array of hashes like { start: ..., end: ... }
     for (var i = 0; i < data.length; i++) {
       var feature = data[i];
       
-      feature.sort = i;
+      feature.sort = start + i;
       
       this.insertFeature(feature);
     }
@@ -493,8 +495,11 @@ Genoverse.Track = Base.extend({
         this.message('This data is not displayed in regions greater than ' + this.formatLabel(this.threshold));
       }
     } else if (!this.getDataRange(params.start, params.end)) {
-      deferred = this.getData(params.start - this.dataBuffer.start, params.end + this.dataBuffer.end).done(function (data) {
-        this.setDataRange(params.start - this.dataBuffer.start, params.end + this.dataBuffer.end);
+      params.start -= this.dataBuffer.start;
+      params.end   += this.dataBuffer.end;
+      
+      deferred = this.getData(params.start, params.end).done(function (data) {
+        this.setDataRange(params.start, params.end);
         
        // try {
           this.parseData(data, params.start, params.end);

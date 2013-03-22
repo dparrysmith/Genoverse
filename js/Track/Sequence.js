@@ -63,6 +63,7 @@ Genoverse.Track.Sequence = Genoverse.Track.extend({
           
           feature = {
             id       : id,
+            sort     : start + k,
             start    : start + k,
             end      : start + k + this.chunkSize + this.buffer,
             strand   : strand,
@@ -76,8 +77,6 @@ Genoverse.Track.Sequence = Genoverse.Track.extend({
         }
       }
     }
-    
-    return this.features.search(bounds);
   },
   
   draw: function (features, featureContext, labelContext, scale) {

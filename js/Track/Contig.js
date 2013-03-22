@@ -10,7 +10,7 @@ Genoverse.Track.Contig = Genoverse.Track.extend({
     return this.base.apply(this, arguments);
   },
   
-  parseData: function (data) {
+  parseData: function (data, start, end) {
     var i = data.features.length;
     
     if (data.colors) {
@@ -22,7 +22,7 @@ Genoverse.Track.Contig = Genoverse.Track.extend({
       data.features[i].color = this.colors[data.features[i].id];
     }
     
-    return this.base(data);
+    this.base(data, start, end);
   },
   
   draw: function (features, featureContext, labelContext, scale) {

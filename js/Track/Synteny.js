@@ -3,7 +3,7 @@ Genoverse.Track.Synteny = Genoverse.Track.extend({
   bump          : true,
   allData       : true,
   
-  parseData: function (data) {
+  parseData: function (data, start, end) {
     data.features = data[this.urlParams.id];
     
     var i = data.features.length;
@@ -25,7 +25,7 @@ Genoverse.Track.Synteny = Genoverse.Track.extend({
       data.features[i].color = data.features[i].labelColor = this.colors[data.features[i].colorId];
     }
     
-    return this.base(data);
+    this.base(data, start, end);
   },
   
   makeImage: function (params) {
