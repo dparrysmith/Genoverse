@@ -13,14 +13,20 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
     }
     
     if (/transcript/.test(renderer)) {
+      this.expanded       = true;
+      this.collapsed      = this.blocks = false;
       this.maxLabelRegion = 2e5;
       this.featureHeight  = 8;
       this.bumpSpacing    = 2;
     } else if (/collapsed/.test(renderer)) {
+      this.collapsed      = true;
+      this.expanded       = this.blocks = false;
       this.maxLabelRegion = 2e6;
       this.featureHeight  = 8;
       this.bumpSpacing    = 2;
     } else {
+      this.blocks         = true;
+      this.expanded       = this.collapsed = false;
       this.maxLabelRegion = 1e7;
       this.featureHeight  = 6;
       this.bumpSpacing    = 1;
@@ -48,12 +54,11 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
   },
   
   drawFeature: function (feature, featureContext, labelContext, scale) {
-    if (/gene/.test(this.urlParams.renderer)) {
+    if (this.blocks) {
       return this.base(feature, featureContext, labelContext, scale);
     }
     
-    var expanded = /transcript/.test(this.urlParams.renderer);
-    var add      = Math.max(scale, 1);
+    var add = Math.max(scale, 1);
     var exon;
     
     for (var i = 0; i < feature.exons.length; i++) {
@@ -70,7 +75,7 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
       
       this.base(exon, featureContext, labelContext, scale);
       
-      if (expanded && i && feature.exons[i - 1].id !== feature.exons[i].id) {
+      if (this.expanded && i && feature.exons[i - 1].id !== feature.exons[i].id) {
         this.drawIntron($.extend({}, exon, {
           start : feature.x + (feature.exons[i - 1].end - feature.start) * scale + add,
           end   : feature.x + (feature.exons[i].start   - feature.start) * scale,
@@ -81,7 +86,7 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
       }
     }
     
-    if (!expanded) {
+    if (this.collapsed && i > 1) {
       featureContext.fillRect(feature.position[scale].X, feature.position[scale].Y + this.featureHeight / 2, feature.position[scale].width, 1);
     }
   },
