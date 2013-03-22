@@ -1,5 +1,3 @@
-// $Revision: 1.3 $
-
 Genoverse.Track.Patch = Genoverse.Track.extend({
   bump          : true,
   featureHeight : 3,

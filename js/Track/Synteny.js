@@ -1,5 +1,3 @@
-// $Revision: 1.2 $
-
 Genoverse.Track.Synteny = Genoverse.Track.extend({
   featureHeight : 5,
   bump          : true,

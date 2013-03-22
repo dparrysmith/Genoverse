@@ -1,9 +1,6 @@
-// $Revision: 1.2 $
-
 Genoverse.Track.Variation = Genoverse.Track.extend({
-  labels : 'overlay',
-  //separateLabels : false,
-  autoHeight     : 'force',
+  labels     : 'overlay',
+  autoHeight : 'force',
   
   // Add triangles at the bottom of inserts
   decorateFeature: function (feature, context, scale) {

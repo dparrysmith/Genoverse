@@ -1,5 +1,3 @@
-// $Revision: 1.1 $
-
 Genoverse.Track.Clone = Genoverse.Track.extend({
   bump   : true,
   labels : 'overlay',

@@ -1,5 +1,3 @@
-// $Revision: 1.5 $
-
 Genoverse.Track.StructuralVariation = Genoverse.Track.extend({ 
   height : 100,
   bump   : true,

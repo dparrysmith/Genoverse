@@ -1,5 +1,3 @@
-// $Revision: 1.3 $
-
 Genoverse.Track.Contig = Genoverse.Track.extend({
   borderColor : '#000000',
   labels      : 'overlay',
