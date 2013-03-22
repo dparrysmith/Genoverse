@@ -4,7 +4,6 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
   bumpSpacing   : 0,
   autoHeight    : true,
   allData       : true,
-  backgrounds   : true,
   unsortable    : true,
   resizable     : false,
   featureStrand : 1,
