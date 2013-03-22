@@ -312,6 +312,14 @@ Genoverse.Track = Base.extend({
       this.dataBuffer.start = Math.max(this.dataBuffer.start, this.browser.labelBuffer);
     }
     
+    if (this.renderer) {
+      var renderer = this.getRenderer();
+      
+      if (renderer !== this.urlParams.renderer) {
+        this.setRenderer(renderer);
+      }
+    }
+    
     this.imgRange[this.scale]       = {};
     this.imgRange[this.scale].left  = 0;
     this.imgRange[this.scale].right = this.width - 1;
