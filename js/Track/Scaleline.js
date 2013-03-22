@@ -1,15 +1,15 @@
 Genoverse.Track.Scaleline = Genoverse.Track.extend({
-  config: {
-    color          : '#000000',
-    height         : 12,
-    featuresHeight : 14,
-    inherit        : [ 'Static' ]
-  },
+  color          : '#000000',
+  height         : 12,
+  featuresHeight : 14,
+  inherit        : [ 'Static' ],
   
   resize: $.noop,
   
-  positionFeatures: function () {
-    if (this.scale === this.drawnScale) {
+  positionFeatures: function (features, params) {
+    if (params.positioned) {
+      return features;
+    } else if (this.scale === this.drawnScale) {
       return false;
     }
     
@@ -17,32 +17,31 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
     var text2  = 'Forward strand';
     var width1 = this.context.measureText(text).width;
     var width2 = this.context.measureText(text2).width;
-    var fill   = {};
     
-    fill[this.color] = [
-      [ 'fillRect', [ 0,                                       this.height / 2, (this.width - width1 - 10) / 2,            1 ] ],
-      [ 'fillRect', [ width1 + (this.width - width1 + 10) / 2, this.height / 2, ((this.width - width1) / 2) - width2 - 45, 1 ] ],
-      [ 'fillRect', [ this.width - 30,                         this.height / 2, 5,                                         1 ] ],
-      [ 'fillText', [ text, (this.width - width1) / 2, 2 ] ],
-      [ 'fillText', [ text2, this.width - width2 - 35, 2 ] ]
+    features = [
+      { x: 0,                                       y: this.height / 2, width: (this.width - width1 - 10) / 2,            height: 1 },
+      { x: width1 + (this.width - width1 + 10) / 2, y: this.height / 2, width: ((this.width - width1) / 2) - width2 - 45, height: 1 },
+      { x: this.width - 30,                         y: this.height / 2, width: 5,                                         height: 1, decorations: true },
+      { x: (this.width - width1) / 2,               y: 2,               width: width1,                                    height: 0, color: '#FFFFFF', labelColor: this.color, label: text  },
+      { x: this.width - width2 - 35,                y: 2,               width: width2,                                    height: 0, color: '#FFFFFF', labelColor: this.color, label: text2 }
     ];
-    
-    fill[this.browser.colors.background] = [[ 'fillRect', [ 0, 0, this.width, this.height ] ]];
     
     this.drawnScale = this.scale;
     
-    return { fill: fill };
+    params.positioned = true;
+    
+    return this.base(features, params);
   },
   
-  decorateFeatures: function () {
-    this.context.strokeStyle = this.color;
+  decorateFeature: function (feature, context, scale) {
+    context.strokeStyle = this.color;
     
-    this.context.beginPath();
-    this.context.moveTo(this.width - 25, this.height * 0.25);
-    this.context.lineTo(this.width - 5,  this.height * 0.5);
-    this.context.lineTo(this.width - 25, this.height * 0.75);
-    this.context.closePath();
-    this.context.stroke();
-    this.context.fill();
+    context.beginPath();
+    context.moveTo(this.width - 25, this.height * 0.25);
+    context.lineTo(this.width - 5,  this.height * 0.5);
+    context.lineTo(this.width - 25, this.height * 0.75);
+    context.closePath();
+    context.stroke();
+    context.fill();
   }
 });

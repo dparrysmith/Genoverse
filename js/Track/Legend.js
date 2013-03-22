@@ -1,29 +1,35 @@
-Genoverse.on('afterSetTracks afterRemoveTracks', function () {
+Genoverse.on('afterInit afterAddTracks afterRemoveTracks', function () {
   for (var i in this.legends) {
     this.legends[i].setTracks();
   }
 });
 
-Genoverse.on('afterCheckTrackSize afterRemoveTracks', function () {
+Genoverse.on('afterCheckHeights afterRemoveTracks', function () {
   for (var i in this.legends) {
-    this.legends[i].makeImage();
+    this.legends[i].makeImage({});
+  }
+});
+
+Genoverse.Track.on('afterPositionFeatures', function (features, params) {
+  var legend = this.legend;
+  
+  if (legend) {
+    setTimeout(function () { legend.makeImage(params); }, 1)
   }
 });
 
 Genoverse.Track.on('afterResize', function (height, userResize) {
   if (this.legend && userResize === true) {
-    this.legend.makeImage();
+    this.legend.makeImage({});
   }
 });
 
 Genoverse.Track.Legend = Genoverse.Track.extend({
-  config: {
-    textColor : '#000000',
-    inherit   : [ 'Static' ]
-  },
+  textColor : '#000000',
+  inherit   : [ 'Static' ],
   
   init: function () {
-    this.imgContainer.css('background', this.browser.colors.background);
+    this.tracks = [];
     
     this.base();
     
@@ -32,6 +38,7 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
     }
     
     this.browser.legends[this.id] = this;
+    this.setTracks();
   },
   
   setTracks: function () {
@@ -41,7 +48,7 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
     this.tracks = $.grep(this.browser.tracks, function (t) { if (t.type === type) { t.legend = legend; return true; } });
   },
   
-  getFeatures: function () {
+  findFeatures: function () {
     var bounds   = { x: this.browser.scaledStart, y: 0, w: this.width };
     var features = {};
     
@@ -60,28 +67,25 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
     });
   },
   
-  positionFeatures: function (features) {
+  positionFeatures: function (f, params) {
+    if (params.positioned) {
+      return f;
+    }
+    
     var cols     = 2;
     var pad      = 5;
     var w        = 20;
     var x        = 0;
     var y        = 0;
-    var xScale   = this.image.width / cols;
+    var xScale   = this.width / cols;
     var yScale   = this.fontHeight + pad;
-    var fill     = {};
+    var features = [{ x: 0, y: 0, width: this.width, height: 1, color: this.textColor }];
     
-    fill[this.textColor] = [[ 'fillRect', [ 0, 0, this.width, 1 ] ]];
-    
-    this.colorOrder = [ this.textColor ];
-    
-    for (var i = 0; i < features.length; i++) {
-      if (!fill[features[i][1]]) {
-        fill[features[i][1]] = [];
-        this.colorOrder.push(features[i][1]);
-      }
-      
-      fill[features[i][1]].push([ 'fillRect', [ (x * xScale) + pad, (y * yScale) + pad, w, this.featureHeight ] ]);
-      fill[this.textColor].push([ 'fillText', [ features[i][0], (x * xScale) + w + (2 * pad), (y * yScale) + pad ] ]);
+    for (var i = 0; i < f.length; i++) {
+      features.push(
+        { x: (x * xScale) + pad,           y: (y * yScale) + pad, width: w,                                       height: this.featureHeight, color: f[i][1] },
+        { x: (x * xScale) + w + (2 * pad), y: (y * yScale) + pad, width: this.context.measureText(f[i][0]).width, height: 1,                  color: 'transparent', label: f[i][0], labelColor: this.textColor }
+      );
       
       if (++x === cols) {
         x = 0;
@@ -91,11 +95,9 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
     
     this.height = this.featuresHeight = ((y + (x ? 1 : 0)) * yScale) + pad;
     
-    fill[this.browser.colors.background] = [[ 'fillRect', [ 0, 0, this.width, this.height ] ]];
+    params.positioned = true;
     
-    this.colorOrder.push(this.browser.colors.background);
-    
-    return { fill: fill };
+    return this.base(features, params);
   },
   
   remove: function () {

@@ -34,23 +34,21 @@ Genoverse.Track.Stranded = {
     }
   },
   
-  positionFeatures: function (features, startOffset, imageWidth) {
+  positionFeatures: function (features, params) {
     var strand = this.featureStrand;
-    return this.base($.grep(features, function (feature) { return feature.strand === strand; }), startOffset, imageWidth);
+    return this.base($.grep(features, function (feature) { return feature.strand === strand; }), params);
   },
   
-  makeForwardImage: function () {
-    var args         = [].splice.call(arguments, 0);
-    var deferred     = $.Deferred();
-    var reverseTrack = this.reverseTrack;
+  makeForwardImage: function (params) {
+    var rtn = this._makeImage(params);
     
-    $.when(this._makeImage.apply(this, args)).done(function (dfd) {
-      $.when(reverseTrack._makeImage.apply(reverseTrack, args.concat($.extend(true, {}, dfd.img)))).done(function (dfd2) {
-        deferred.resolve({ target: $.map([ dfd.target, dfd2.target ], function (t) { return t; }), img: [ dfd.img, dfd2.img ] }); // map flattens arrays if targets have labels and features
+    if (rtn && typeof rtn.done === 'function') {
+      rtn.done(function () {
+        this.reverseTrack._makeImage(params, rtn);
       });
-    });
-    
-    return deferred;
+    } else {
+      this.reverseTrack._makeImage(params, rtn);
+    }
   },
   
   remove: function () {
