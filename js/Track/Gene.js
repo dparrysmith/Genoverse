@@ -91,10 +91,6 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
     }
   },
   
-  decorateFeature: function (feature, context, scale) {
-    console.log(feature.highlight)
-  },
-  
   drawIntron: function (feature, context) {
     var x1 = feature.start; // x coord of the right edge of the first exon
     var x3 = feature.end;   // x coord of the left edge of the second exon
