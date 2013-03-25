@@ -30,8 +30,8 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
       while (i--) {
         delete features[i].position[scale].H;
         delete features[i].position[scale].Y;
-        delete features[i].position[scale].bumped;
         delete features[i].position[scale].bottom;
+        delete features[i].position[scale].positioned;
       }
       
       return this.base(features, params);
@@ -40,7 +40,7 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
   
   makeImage: function (params) {
     return this.base(params).done(function (data) {
-      var bgImage = $('<img class="bg" />').data(params).prependTo(this.imgContainers[this.imgContainers.length - 1]);
+      var bgImage = $('<img class="bg" />').data(params).prependTo(params.container);
       var heights = [ this.heights.max ];
       
       if (this.strand === 1) {
@@ -56,7 +56,7 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
     });
   },
   
-  drawBackground: function (data, context, features) {
+  drawBackground: function (params, context, features) {
     var reverse = this.strand === -1;
     var i       = features.length;
     var start, width;
@@ -68,7 +68,7 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
     while (i--) {
       context.fillStyle = features[i].background;
       
-      if (features[i].end >= data.start && features[i].start <= data.end) {
+      if (features[i].end >= params.start && features[i].start <= params.end) {
         start = Math.max(features[i].position[this.scale].X, 0);
         width = Math.min(features[i].position[this.scale].width + (start ? 0 : features[i].position[this.scale].X), this.width);
         

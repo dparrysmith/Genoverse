@@ -1,21 +1,19 @@
 Genoverse.Track.Scalebar = Genoverse.Track.extend({
-  height            : 20,
-  featureHeight     : 6,
-  spacing           : 0,
-  color             : '#000000',
-  autoHeight        : false,
-  unsortable        : true,
-  labels            : true,
-  bump              : false,
-  fixedHeight       : true,
-  order             : 0,
-  orderReverse      : 1e5,
-  featureStrand     : 1,
-  controls          : 'off',
-  guideLines        : {},
-  guideLinesByScale : {},
-  inherit           : [ 'Stranded' ],
-  colors            : {
+  height        : 20,
+  featureHeight : 6,
+  spacing       : 0,
+  color         : '#000000',
+  autoHeight    : false,
+  unsortable    : true,
+  labels        : true,
+  bump          : false,
+  fixedHeight   : true,
+  order         : 0,
+  orderReverse  : 1e5,
+  featureStrand : 1,
+  controls      : 'off',
+  inherit       : [ 'Stranded' ],
+  colors        : {
     majorGuideLine : '#CCCCCC',
     minorGuideLine : '#E5E5E5'
   },
@@ -57,12 +55,6 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     this.seen         = {};
     this.features     = new RTree();
     this.featuresById = {};
-
-    if (!this.guideLinesByScale[this.scale]) {
-      this.guideLinesByScale[this.scale] = { major: {} };
-    }
-    
-    this.guideLines = this.guideLinesByScale[this.scale];
     
     this.base();
   },
@@ -75,7 +67,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     params.featureHeight = this.height;
     params.labelHeight   = 0;
     
-    var div     = this.imgContainer.clone().addClass(('fullHeight scale_' + params.scale).replace('.', '_')).css('left', params.left);
+    var div     = this.imgContainer.clone().addClass(('fullHeight ' + this.browser.scrollStart).replace('.', '_')).css('left', params.left);
     var image   = $('<img class="data" />').data(params).appendTo(div);
     var bgImage = $('<img class="bg guidelines fullHeight" />').data(params).prependTo(div);
     
@@ -146,6 +138,8 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     
     featureContext.textBaseline = 'top';
     featureContext.fillStyle    = this.color;
+    
+    this.guideLines = { major: {} }; // FIXME: pass params to draw, rather than scale. set guideLines on params
     
     while (i--) {
       feature = features[i];
