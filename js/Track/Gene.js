@@ -58,35 +58,46 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
       return this.base(feature, featureContext, labelContext, scale);
     }
     
-    var add = Math.max(scale, 1);
-    var exon;
+    var add      = Math.max(scale, 1);
+    var exons    = {};
+    var exonsIds = [];
     
     for (var i = 0; i < feature.exons.length; i++) {
-      exon = $.extend({}, feature, {
+      this.base($.extend({}, feature, {
         x     : feature.x + (feature.exons[i].start - feature.start) * scale, 
         width : (feature.exons[i].end - feature.exons[i].start) * scale + add,
         label : i ? false : feature.label
       }, feature.exons[i].style === 'strokeRect' ? {
-        color       : false,
-        borderColor : feature.color,
         y           : feature.y + 1,
-        height      : feature.height - 3
-      } : {});
+        height      : feature.height - 3,
+        color       : false,
+        borderColor : feature.color
+      } : {}), featureContext, labelContext, scale);
       
-      this.base(exon, featureContext, labelContext, scale);
-      
-      if (this.expanded && i && feature.exons[i - 1].id !== feature.exons[i].id) {
-        this.drawIntron($.extend({}, exon, {
-          start : feature.x + (feature.exons[i - 1].end - feature.start) * scale + add,
-          end   : feature.x + (feature.exons[i].start   - feature.start) * scale,
-          y     : feature.y + this.featureHeight / 2,
-          y2    : feature.y + (feature.strand > 0 ? 0 : this.featureHeight),
-          color : feature.color
-        }), featureContext);
+      if (this.expanded) {
+        // For partially coding exons, the exon is duplicated in the array, with one strokeRect and one fillRect
+        // In this case we want to ensure that the intron line is drawn from the real start and end - the maximum of these values between the duplicated exons
+        if (!exons[feature.exons[i].id]) {
+          exons[feature.exons[i].id] = { start: 9e99, end: -9e99 };
+          exonsIds.push(feature.exons[i].id);
+        }
+        
+        exons[feature.exons[i].id].start = Math.min(exons[feature.exons[i].id].start, feature.exons[i].start);
+        exons[feature.exons[i].id].end   = Math.max(exons[feature.exons[i].id].end,   feature.exons[i].end);
       }
     }
     
-    if (this.collapsed && i > 1) {
+    if (this.expanded) {
+      for (i = 1; i < exonsIds.length; i++) {
+        this.drawIntron({
+          start : feature.x + (exons[exonsIds[i - 1]].end - feature.start) * scale + add,
+          end   : feature.x + (exons[exonsIds[i]].start   - feature.start) * scale,
+          y     : feature.y + this.featureHeight / 2,
+          y2    : feature.y + (feature.strand > 0 ? 0 : this.featureHeight),
+          color : feature.color
+        }, featureContext);
+      }
+    } else if (this.collapsed && feature.exons.length > 1) {
       featureContext.fillRect(feature.position[scale].X, feature.position[scale].Y + this.featureHeight / 2, feature.position[scale].width, 1);
     }
   },
