@@ -294,10 +294,9 @@ var Genoverse = Base.extend({
     if (update !== false) {
       if (this.start !== this.dragStart) {
         this.updateURL();
-        this.redraw();
       }
       
-      this.checkHeights();
+      this.checkTrackHeights();
     }
   },
   
@@ -529,7 +528,7 @@ var Genoverse = Base.extend({
     }
   },
   
-  checkHeights: function () {
+  checkTrackHeights: function () {
     if (this.dragging) {
       return;
     }
@@ -579,14 +578,6 @@ var Genoverse = Base.extend({
     var end   = this.length === 1 ? start + 1 : Math.round(start + 2 * (this.length - 1));
     
     this.setRange(start, end, true);
-  },
-  
-  redraw: function () {
-    if (this.left === 0 || (this.left > 0 && this.left < this.offsets.right) || (this.left < 0 && Math.abs(this.left) < Math.abs(this.offsets.left + this.wrapperLeft))) {
-      return false;
-    }
-    
-    return true;
   },
   
   setTracks: function (tracks, index) {
@@ -749,7 +740,7 @@ var Genoverse = Base.extend({
           this.makeTrackImages(newTracks);
         }
         
-        this.checkHeights();
+        this.checkTrackHeights();
         
         images.show();
         images = null;
@@ -980,7 +971,7 @@ var Genoverse = Base.extend({
 
 // Genoverse.on('afterMove afterZoomIn afterZoomOut', function () {
 //   $('.static', this.wrapper).css('left', -this.left);
-//   this.checkHeights();
+//   this.checkTrackHeights();
 // });
 
 Genoverse.prototype.origin = $('script:last').attr('src').split('/').slice(0, -2).join('/') || '.';
