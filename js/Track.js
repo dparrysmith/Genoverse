@@ -480,19 +480,18 @@ Genoverse.Track = Base.extend({
   },
   
   makeImage: function (params) {
-    // TODO: check params
-    params.scaledStart   = params.start * params.scale;
-    params.width         = this.width;
-    params.height        = this.height;
-    params.featureHeight = 0;
-    params.labelHeight   = 0;
+    params.scaledStart   = params.scaledStart   || params.start * params.scale;
+    params.width         = params.width         || this.width;
+    params.height        = params.height        || this.height;
+    params.featureHeight = params.featureHeight || 0;
+    params.labelHeight   = params.labelHeight   || 0;
     
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
     var div       = this.imgContainer.clone().addClass((this.browser.scrollStart + ' loading').replace('.', '_')).css('left', params.left);
+    var bgImage   = params.background ? $('<img class="bg" />').addClass(params.background).data(params).prependTo(div) : false;
     var image     = $('<img class="data" />').hide().data(params).appendTo(div).load(function () {
-      div.removeClass('loading');
-      $(this).fadeIn('fast');
+      $(this).fadeIn('fast').parent().removeClass('loading');
     });
     
     params.container = div;
@@ -516,7 +515,13 @@ Genoverse.Track = Base.extend({
     }
     
     return deferred.done(function () {
-      this.render(threshold ? [] : this.findFeatures(params.start, params.end), image);
+      var features = threshold ? [] : this.findFeatures(params.start, params.end)
+      
+      this.render(features, image);
+      
+      if (bgImage) {
+        this.renderBackground(features, bgImage);
+      }
     });
   },
   
@@ -782,6 +787,14 @@ Genoverse.Track = Base.extend({
     featureCanvas = labelCanvas = img = null;
   },
   
+  renderBackground: function (features, img, height) {
+    var canvas = $('<canvas />').attr({ width: this.width, height: height || 1 })[0];
+    this.drawBackground(features, canvas.getContext('2d'), img.data());
+    img.attr('src', canvas.toDataURL());
+    $(canvas).remove();
+    canvas = img = null;
+  },
+  
   draw: function (features, featureContext, labelContext, scale) {
     var feature;
     
@@ -886,14 +899,6 @@ Genoverse.Track = Base.extend({
     }
     
     return $.extend(data, this.urlParams);
-  },
-  
-  renderBackground: function (img, height, features) {
-    var canvas = $('<canvas />').attr({ width: this.width, height: height || 1 })[0];
-    this.drawBackground(img.data(), canvas.getContext('2d'), features);
-    img.attr('src', canvas.toDataURL());
-    $(canvas).remove();
-    canvas = null;
   },
   
   formatLabel: function (label) {

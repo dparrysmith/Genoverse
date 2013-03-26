@@ -60,31 +60,20 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   },
   
   makeImage: function (params) {
-    // TODO: check params
-    params.scaledStart   = params.start * params.scale;
-    params.width         = this.width;
-    params.height        = this.height;
+    params.background    = 'guidelines fullHeight';
     params.featureHeight = this.height;
-    params.labelHeight   = 0;
-    
-    var div     = this.imgContainer.clone().addClass(('fullHeight ' + this.browser.scrollStart).replace('.', '_')).css('left', params.left);
-    var image   = $('<img class="data" />').data(params).appendTo(div);
-    var bgImage = $('<img class="bg guidelines fullHeight" />').data(params).prependTo(div);
-    
-    this.imgContainers.push(div[0]);
-    this.scrollContainer.append(this.imgContainers);
     
     this.setFeatures(params.start, params.end);
-    this.render(this.findFeatures(params.start, params.end), image);
-    this.renderBackground(bgImage);
     
-    div = bgImage = null;
+    var rtn = this.base(params);
     
-    return image;
+    params.container.addClass('fullHeight');
+    
+    return rtn;
   },
   
-  makeReverseImage: function (params, image) {
-    this.imgContainers.push(image.parent().clone().html(image.clone().css('background', '#FFF'))[0]);
+  makeReverseImage: function (params) {
+    this.imgContainers.push(params.container.clone().html(params.container.children('.data').clone(true).css('background', '#FFF'))[0]);
     this.scrollContainer.append(this.imgContainers);
   },
   
@@ -153,6 +142,10 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
       }), featureContext, labelContext, scale);
       
       if (feature.label) {
+        if (start > -1) {
+          featureContext.fillRect(start, this.featureHeight, 1, this.featureHeight);
+        }
+        
         this.guideLines.major[feature.start] = true;
       }
       
@@ -165,7 +158,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   },
   
   // Draw guidelines
-  drawBackground: function (params, context) {
+  drawBackground: function (f, context) {
     for (var i in this.guideLines) {
       if (this.guideLines[i] >= 0 && this.guideLines[i] <= this.width) {
         context.fillStyle = this.colors[this.guideLines.major[i] ? 'majorGuideLine' : 'minorGuideLine' ];

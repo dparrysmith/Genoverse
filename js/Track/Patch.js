@@ -39,25 +39,29 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
   },
   
   makeImage: function (params) {
-    return this.base(params).done(function (data) {
-      var bgImage  = $('<img class="bg" />').data(params).prependTo(params.container);
-      var heights  = [ this.heights.max ];
-      var features = this.positionFeatures($.extend(true, [], this.findFeatures(params.start, params.end)), params);
-      
-      if (this.strand === 1) {
-        bgImage = bgImage.add(bgImage.clone(true).addClass('fullHeight').css('top', this.fullVisibleHeight).prependTo(bgImage.parent().addClass('fullHeight')));
-        heights.unshift(1);
-      } else {
-        bgImage.css('background', '#FFF');
-      }
-      
-      for (var i = 0; i < bgImage.length; i++) {
-        this.renderBackground(bgImage.eq(i), heights[i], features);
-      }
-    });
+    params.background       = true;
+    params.backgroundHeight = this.strand === 1 ? [ 1, this.heights.max ] : [ this.heights.max ];
+    return this.base(params);
   },
   
-  drawBackground: function (params, context, features) {
+  renderBackground: function (f, img, height) {
+    var params   = img.data();
+    var heights  = [ this.heights.max ];
+    var features = this.positionFeatures($.extend(true, [], this.findFeatures(params.start, params.end)), params);
+    
+    if (this.strand === 1) {
+      img.push(img.clone(true).addClass('fullHeight').css('top', this.fullVisibleHeight).prependTo(img.parent().addClass('fullHeight'))[0]);
+      heights.push(1);
+    } else {
+      img.css('background', this.browser.colors.background);
+    }
+    
+    for (var i = 0; i < img.length; i++) {
+      this.base(features, img.eq(i), heights[i]);
+    }
+  },
+  
+  drawBackground: function (features, context, params) {
     var scale   = params.scale;
     var reverse = this.strand === -1;
     
