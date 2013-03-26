@@ -1,12 +1,13 @@
 Genoverse.Track.TranslatedSequence = Genoverse.Track.Sequence.extend({
+  chunkSize    : 600, // Must be divisible by 3 and 2
+  buffer       : 2,
+  codonTableId : 1,
+  codons       : {},
+  
   constructor: function (config) {
     this.base(config);
     
-    this.widestLabel  = this.lowerCase ? 'm' : 'M';
-    this.chunkSize    = 600; // Must be divisible by 3 and 2
-    this.buffer       = 2;
-    this.codonTableId = 1;
-    this.codons       = {};
+    this.widestLabel = this.lowerCase ? 'm' : 'M';
     
     var bases = this.lowerCase ? [ 't', 'c', 'a', 'g' ] : [ 'T', 'C', 'A', 'G' ];
     var x     = 0;
@@ -87,7 +88,7 @@ Genoverse.Track.TranslatedSequence = Genoverse.Track.Sequence.extend({
   
   positionFeature: function (feature, params) {
     this.base(feature, params);
-    feature.position[params.scale].bottom *= 3;
+    feature.position[params.scale].bottom = (feature.position[params.scale].H + this.spacing) * 3;
     params.featureHeight = Math.max(params.featureHeight, feature.position[params.scale].bottom);
   },
   

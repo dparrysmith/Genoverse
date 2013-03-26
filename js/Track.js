@@ -3,7 +3,7 @@ Genoverse.Track = Base.extend({
   dataType       : 'json',
   color          : '#000000',
   fontHeight     : 10,
-  buffer         : 1,//1.2,                  // number of widths, if left of right closer to the edges of viewpoint than the buffer, start making more images
+  scrollBuffer   : 1,//1.2,              // number of widths, if left of right closer to the edges of viewpoint than the buffer, start making more images
   dataBuffer     : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
   fontFamily     : 'sans-serif',
   fontWeight     : 'normal',
@@ -323,7 +323,7 @@ Genoverse.Track = Base.extend({
       }
     }
     
-    this.imgRange[this.browser.scrollStart]    = { left: (this.buffer + 1) * -this.width, right: (this.buffer + 1) * this.width };
+    this.imgRange[this.browser.scrollStart]    = { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
     this.scrollRange[this.browser.scrollStart] = { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
     this.messageContainer.empty();
@@ -448,7 +448,7 @@ Genoverse.Track = Base.extend({
     
     var scrollStart = this.browser.scrollStart;
     
-    if (this.imgRange[scrollStart].left + this.left > -this.buffer * this.width) {
+    if (this.imgRange[scrollStart].left + this.left > -this.scrollBuffer * this.width) {
       var end = this.scrollRange[scrollStart].start - 1;
       
       this.makeImage({
@@ -462,7 +462,7 @@ Genoverse.Track = Base.extend({
       this.scrollRange[scrollStart].start -= this.browser.length;
     }
     
-    if (this.imgRange[scrollStart].right + this.left < this.buffer * this.width) {
+    if (this.imgRange[scrollStart].right + this.left < this.scrollBuffer * this.width) {
       var start = this.scrollRange[scrollStart].end + 1;
       
       this.makeImage({
