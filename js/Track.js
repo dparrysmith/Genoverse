@@ -531,8 +531,8 @@ Genoverse.Track = Base.extend({
     var length = this.browser.length;
     
     function makeImages() {
-      this.makeImage({ start: start - length, end: start - 1,    scale: this.scale, left: -this.width });
       this.makeImage({ start: start,          end: end,          scale: this.scale, left: 0           });
+      this.makeImage({ start: start - length, end: start - 1,    scale: this.scale, left: -this.width });
       this.makeImage({ start: end + 1,        end: end + length, scale: this.scale, left: this.width  });
     }
     
