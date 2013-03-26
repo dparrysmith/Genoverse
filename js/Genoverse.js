@@ -448,31 +448,30 @@ var Genoverse = Base.extend({
   
   move: function (delta, callback) {
     var scale = this.scale;
-    var start, end;
+    var start, end, left;
     
     if (this.menus.length) {
       this.closeMenus();
     }
-
-    // Force stepping by base pair when in small regions
+    
     if (scale > 1) {
-      this.left = Math.round(this.left / scale) * scale;
-      
-      if (delta) {
-        delta = Math.round(delta / scale) * scale;
-      }
+      delta = Math.round(delta / scale) * scale; // Force stepping by base pair when in small regions
     }
     
-    if (this.left + delta < this.minLeft) {
+    left = this.left + delta;
+    
+    if (left <= this.minLeft) {
+      left  = this.minLeft;
       delta = this.minLeft - this.left;
-    } else if (this.left > this.maxLeft) {
+    } else if (left >= this.maxLeft) {
+      left  = this.maxLeft;
       delta = this.maxLeft - this.left;
     }
     
-    this.left += delta;
+    start = Math.round(this.start - delta / scale);
+    end   = start + this.length - 1;
     
-    start = Math.max(this.start - delta / scale, 1);
-    end   = Math.min(start + this.length - 1, this.chromosomeSize);
+    this.left = left;
     
     for (var i = 0; i < this.tracks.length; i++) {
       this.tracks[i].move(delta, scale);
@@ -480,7 +479,7 @@ var Genoverse = Base.extend({
     
     this.setRange(start, end);
   },
-
+  
   setRange: function (start, end, update, force) {
     this.prev.start = this.start;
     this.prev.end   = this.end;
@@ -488,7 +487,7 @@ var Genoverse = Base.extend({
     this.end        = Math.min(typeof end   === 'number' ? Math.floor(end)   : parseInt(end,   10), this.chromosomeSize);
     
     if (this.end < this.start) {
-      this.end = this.start + this.defaultLength;
+      this.end = Math.min(this.start + this.defaultLength - 1, this.chromosomeSize);
     }
     
     this.length = this.end - this.start + 1;
