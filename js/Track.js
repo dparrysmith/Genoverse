@@ -276,7 +276,7 @@ Genoverse.Track = Base.extend({
     if (this.fullVisibleHeight - this.bumpSpacing > this.height) {
       this.expander = (this.expander || $('<div class="expander static">').width(this.width).appendTo(this.container).on('click', function () {
         track.resize(track.fullVisibleHeight);
-      })).css('left', -this.browser.left)[this.height === 0 ? 'hide' : 'show']();
+      }))[this.height === 0 ? 'hide' : 'show']();
     } else if (this.expander) {
       this.expander.hide();
     }    
