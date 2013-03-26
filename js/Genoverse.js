@@ -286,7 +286,7 @@ var Genoverse = Base.extend({
     this.dragging  = false;
     this.scrolling = false;
     
-    $('.overlay', this.wrapper).add('.gv-menu', this.menuContainer).add(this.selector).css({
+    $('.overlay', this.wrapper).add('.gv_menu', this.menuContainer).add(this.selector).css({
       left       : function (i, left) { return (this.className.indexOf('selector') === -1 ? 0 : 1) + parseFloat(left, 10) + parseFloat($(this).css('marginLeft'), 10); },
       marginLeft : function ()        { return  this.className.indexOf('selector') === -1 ? 0 : -1; }
     });
@@ -720,7 +720,7 @@ var Genoverse = Base.extend({
     
     var delta = Math.round((this.start - this.prev.start) * this.scale);
     
-    $('.gv-menu', this.menuContainer).css('left', function (i, left) { return parseFloat(left, 10) - delta; });
+    $('.gv_menu', this.menuContainer).css('left', function (i, left) { return parseFloat(left, 10) - delta; });
   },
   
   updateFromHistory: function () {
