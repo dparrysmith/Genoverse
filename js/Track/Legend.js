@@ -4,7 +4,7 @@ Genoverse.on('afterInit afterAddTracks afterRemoveTracks', function () {
   }
 });
 
-Genoverse.on('afterCheckHeights afterRemoveTracks', function () {
+Genoverse.on('afterCheckTrackHeights afterRemoveTracks', function () {
   for (var i in this.legends) {
     this.legends[i].makeImage({});
   }
