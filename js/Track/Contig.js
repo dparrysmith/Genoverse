@@ -1,6 +1,7 @@
 Genoverse.Track.Contig = Genoverse.Track.extend({
   borderColor : '#000000',
   labels      : 'overlay',
+  fixedHeight : true,
   
   getQueryString: function () {
     if (!this.colors) {
