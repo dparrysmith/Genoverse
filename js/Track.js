@@ -16,7 +16,6 @@ Genoverse.Track = Base.extend({
   urlTemplate    : {},
   inherit        : [],
   xhrFields      : {},
-  featuresById   : {},
   imgRange       : {},
   scrollRange    : {},
   
@@ -93,12 +92,12 @@ Genoverse.Track = Base.extend({
     if (this.renderer) {
       this.urlParams.renderer   = this.renderer;
       this.featuresByRenderer   = {};
-      this.featureIdsByRenderer = {};
+      this.featuresByIdRenderer = {};
       this.features             = this.featuresByRenderer[this.renderer]   = new RTree();
-      this.featureIds           = this.featureIdsByRenderer[this.renderer] = {};
+      this.featuresById         = this.featuresByIdRenderer[this.renderer] = {};
     } else {
-      this.features   = new RTree();
-      this.featureIds = {};
+      this.features     = new RTree();
+      this.featuresById = {};
     }
     
     this.dataRanges    = {};
@@ -369,7 +368,7 @@ Genoverse.Track = Base.extend({
       this.urlParams.renderer = renderer;
       this.dataRanges         = {};
       this.features           = (this.featuresByRenderer[renderer]   = this.featuresByRenderer[renderer]   || new RTree());
-      this.featureIds         = (this.featureIdsByRenderer[renderer] = this.featureIdsByRenderer[renderer] || {});
+      this.featuresById       = (this.featuresByIdRenderer[renderer] = this.featuresByIdRenderer[renderer] || {});
     }
     
     if (permanent && this.renderer !== renderer) {

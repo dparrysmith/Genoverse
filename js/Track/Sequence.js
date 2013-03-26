@@ -57,7 +57,7 @@ Genoverse.Track.Sequence = Genoverse.Track.extend({
         for (k = 0; k < seq.length; k += this.chunkSize) {
           id = (start + k) + ':' + strand;
           
-          if (this.featureIds[id]) {
+          if (this.featuresById[id]) {
             continue;
           }
           
@@ -72,7 +72,7 @@ Genoverse.Track.Sequence = Genoverse.Track.extend({
           
           if (feature.sequence.length > this.buffer) {
             this.features.insert({ x: feature.start, w: this.chunkSize + this.buffer, y: 0, h: 1 }, feature);
-            this.featureIds[id] = 1;
+            this.featuresById[id] = feature;
           }
         }
       }
