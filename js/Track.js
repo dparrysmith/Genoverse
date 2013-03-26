@@ -793,8 +793,6 @@ Genoverse.Track = Base.extend({
         this.drawFeature($.extend({}, feature, {
           x             : feature.position[scale].X,
           y             : feature.position[scale].Y,
-          W             : feature.position[scale].W,
-          H             : feature.position[scale].H,
           width         : feature.position[scale].width,
           height        : feature.position[scale].height,
           labelPosition : feature.position[scale].label
