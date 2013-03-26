@@ -1,6 +1,6 @@
 Genoverse.Track.Scalebar = Genoverse.Track.extend({
   height        : 20,
-  featureHeight : 6,
+  featureHeight : 3,
   spacing       : 0,
   color         : '#000000',
   autoHeight    : false,
@@ -145,11 +145,14 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
       feature = features[i];
       start   = Math.round(feature.position[scale].X);
       
-      featureContext.fillRect(start, 0, Math.ceil(feature.position[scale].width), this.featureHeight / 2);
+      this.drawFeature($.extend({}, feature, {
+        x      : start,
+        y      : 0,
+        width  : Math.ceil(feature.position[scale].width),
+        height : this.featureHeight
+      }), featureContext, labelContext, scale);
       
       if (feature.label) {
-        featureContext.fillRect(start, 0, 1, this.featureHeight);
-        featureContext.fillText(feature.label, start, this.featureHeight);
         this.guideLines.major[feature.start] = true;
       }
       
@@ -158,7 +161,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     }
     
     featureContext.fillRect(0, 0, featureContext.canvas.width, 1);
-    featureContext.fillRect(0, this.featureHeight / 2, featureContext.canvas.width, 1);
+    featureContext.fillRect(0, this.featureHeight, featureContext.canvas.width, 1);
   },
   
   // Draw guidelines
