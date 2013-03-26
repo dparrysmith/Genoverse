@@ -435,6 +435,7 @@ Genoverse.Track = Base.extend({
   resetFeaturePositions: function () {
     this.scaleSettings    = {};
     this.featurePositions = new RTree();
+    this.labelPositions   = this.labels === 'separate' ? new RTree() : this.featurePositions;
     
     for (var id in this.featuresById) {
       delete this.featuresById[id].position;
