@@ -969,11 +969,6 @@ var Genoverse = Base.extend({
   }
 });
 
-// Genoverse.on('afterMove afterZoomIn afterZoomOut', function () {
-//   $('.static', this.wrapper).css('left', -this.left);
-//   this.checkTrackHeights();
-// });
-
 Genoverse.prototype.origin = $('script:last').attr('src').split('/').slice(0, -2).join('/') || '.';
 
 if (typeof LazyLoad !== 'undefined') {
