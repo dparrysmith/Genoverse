@@ -40,8 +40,9 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
   
   makeImage: function (params) {
     return this.base(params).done(function (data) {
-      var bgImage = $('<img class="bg" />').data(params).prependTo(params.container);
-      var heights = [ this.heights.max ];
+      var bgImage  = $('<img class="bg" />').data(params).prependTo(params.container);
+      var heights  = [ this.heights.max ];
+      var features = this.positionFeatures($.extend(true, [], this.findFeatures(params.start, params.end)), params);
       
       if (this.strand === 1) {
         bgImage = bgImage.add(bgImage.clone(true).addClass('fullHeight').css('top', this.fullVisibleHeight).prependTo(bgImage.parent().addClass('fullHeight')));
@@ -51,35 +52,26 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
       }
       
       for (var i = 0; i < bgImage.length; i++) {
-        this.renderBackground(bgImage.eq(i), heights[i], this.featurePositions.search({ x: params.scaledStart, y: 0, w: this.width, h: this.heights.max }));
+        this.renderBackground(bgImage.eq(i), heights[i], features);
       }
     });
   },
   
   drawBackground: function (params, context, features) {
+    var scale   = params.scale;
     var reverse = this.strand === -1;
-    var i       = features.length;
-    var start, width;
     
     if (reverse) {
       features.reverse();
     }
     
-    while (i--) {
-      context.fillStyle = features[i].background;
-      
-      if (features[i].end >= params.start && features[i].start <= params.end) {
-        start = Math.max(features[i].position[this.scale].X, 0);
-        width = Math.min(features[i].position[this.scale].width + (start ? 0 : features[i].position[this.scale].X), this.width);
-        
-        if (reverse) {
-          context.fillRect(start, 0, width, features[i].position[this.scale].Y);
-        } else if (context.canvas.height === 1) {
-          context.fillRect(start, 0, width, 1);
-        } else {
-          context.fillRect(start, features[i].position[this.scale].bottom - this.spacing, width, context.canvas.height);
-        }
-      }
+    for (var i = 0; i < features.length; i++) {
+      this.drawFeature($.extend({}, features[i], {
+        x     : features[i].position[scale].X,
+        width : features[i].position[scale].width,
+        color : features[i].background,
+        label : false
+      }, reverse ? { y: 0, height: features[i].position[scale].Y } : { y: context.canvas.height === 1 ? 0 : features[i].position[scale].bottom - this.spacing, height: context.canvas.height }), context, false, scale);
     }
   }
 });
