@@ -359,7 +359,7 @@ Genoverse.Track = Base.extend({
       track[this] = scaleSettings[this];
     });
     
-    this.scrollContainer.css('left', this.browser.left).children('.image_container').hide();
+    this.scrollContainer.css('left', 0).children('.image_container').hide();
     this.makeFirstImage();
   },
   
@@ -373,12 +373,8 @@ Genoverse.Track = Base.extend({
     
     if (permanent && this.renderer !== renderer) {
       this.renderer = renderer;
-      
-      if ($(this.imgContainers).filter(this.browser.left > 0 ? ':first' : ':last').data('img')) {
-        this.reset();
-        this.setScale();
-        this.browser.makeTrackImages([ this ]);
-      }
+      this.reset();
+      this.setScale();
     }
   },
   
@@ -657,7 +653,7 @@ Genoverse.Track = Base.extend({
     
     params.width         = Math.ceil(params.width);
     params.height        = Math.ceil(params.height);
-    params.featureHeight = Math.ceil(params.featureHeight);
+    params.featureHeight = Math.max(Math.ceil(params.featureHeight), this.fixedHeight ? Math.max(this.height, this.minLabelHeight) : 0);
     params.labelHeight   = Math.ceil(params.labelHeight);
     
     return features;
