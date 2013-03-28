@@ -26,6 +26,7 @@ Genoverse.Track.on('afterResize', function (height, userResize) {
 
 Genoverse.Track.Legend = Genoverse.Track.extend({
   textColor : '#000000',
+  labels    : 'overlay',
   inherit   : [ 'Static' ],
   
   init: function () {
@@ -80,11 +81,16 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
     var xScale   = this.width / cols;
     var yScale   = this.fontHeight + pad;
     var features = [{ x: 0, y: 0, width: this.width, height: 1, color: this.textColor }];
+    var xPos, yPos, labelWidth;
     
     for (var i = 0; i < f.length; i++) {
+      xPos       = (x * xScale) + pad;
+      yPos       = (y * yScale) + pad;
+      labelWidth = this.context.measureText(f[i][0]).width;
+      
       features.push(
-        { x: (x * xScale) + pad,           y: (y * yScale) + pad, width: w,                                       height: this.featureHeight, color: f[i][1] },
-        { x: (x * xScale) + w + (2 * pad), y: (y * yScale) + pad, width: this.context.measureText(f[i][0]).width, height: 1,                  color: 'transparent', label: f[i][0], labelColor: this.textColor }
+        { x: xPos,           y: yPos, width: w,              height: this.featureHeight, color: f[i][1] },
+        { x: xPos + pad + w, y: yPos, width: labelWidth + 1, height: this.featureHeight, color: false, labelColor: this.textColor, labelWidth: labelWidth, label: f[i][0] }
       );
       
       if (++x === cols) {
