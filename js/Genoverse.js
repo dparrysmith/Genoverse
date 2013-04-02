@@ -505,8 +505,6 @@ var Genoverse = Base.extend({
     this.scaledStart = this.start * this.scale;
     
     if (force || this.prev.scale !== this.scale) {
-      this.dataRegion  = { start: 9e99, end: -9e99 };
-      this.offsets     = { right: this.width, left: -this.width };
       this.left        = 0;
       this.prev.left   = 0;
       this.minLeft     = Math.round((this.end   - this.chromosomeSize) * this.scale);
@@ -682,35 +680,15 @@ var Genoverse = Base.extend({
     this.setHistory();
   },
   
-  setHistory: function (dataRegion, offsets) {
-    if (this.prev.history) {
-      var history = {
-        dataRegion : dataRegion || this.history[this.prev.history].dataRegion,
-        offsets    : offsets    || this.history[this.prev.history].offsets
-      };
-      
-      if (!this.history[this.start + '-' + this.end] || (dataRegion && offsets)) {
-        this.history[this.start + '-' + this.end] = $.extend({
-          left        : this.left,
-          scrollStart : this.scrollStart
-        }, history);
-      }
-      
-      if (dataRegion && offsets) {
-        for (var i in this.history) {
-          if (this.history[i].scrollStart === this.scrollStart) {
-            $.extend(this.history[i], history);
-          }
-        }
-      }
-    }
+  // FIXME: won't work
+  setHistory: function () {
   },
   
   popState: function () {
     var coords = this.getURLCoords();
     
     if (coords.start && !(parseInt(coords.start, 10) === this.start && parseInt(coords.end, 10) === this.end)) {
-      this.setRange(coords.start, coords.end);
+      this.setRange(coords.start, coords.end, false, false);
       
       if (!this.updateFromHistory()) {
         this.reset();
@@ -722,32 +700,8 @@ var Genoverse = Base.extend({
     $('.gv_menu', this.menuContainer).css('left', function (i, left) { return parseFloat(left, 10) - delta; });
   },
   
+  // FIXME: won't work
   updateFromHistory: function () {
-    var history = this.history[this.start + '-' + this.end];
-    
-    if (history && (this.prev.start !== this.start || this.prev.end !== this.end)) {
-      var images = $('.track_container .' + history.scrollStart, this.container);
-      
-      if (images.length) {
-        var newTracks = $.grep(this.tracks, function (track) { return !$(track.imgContainers).filter('.' + history.scrollStart).length; });
-        
-        $('.track_container', this.container).css('left', history.left).children('.image_container').hide();
-        
-        $.extend(true, this, history);
-        
-        if (newTracks.length) {
-          this.makeTrackImages(newTracks);
-        }
-        
-        this.checkTrackHeights();
-        
-        images.show();
-        images = null;
-        
-        return true;
-      }
-    }
-    
     return false;
   },
   
@@ -803,10 +757,10 @@ var Genoverse = Base.extend({
     }
   }),
   
-  makeMenu: function (feature, position, track) {
+  makeMenu: function (feature, event, track) {
     var wrapper = this.wrapper;
     var offset  = wrapper.offset();
-    var menu    = this.menuTemplate.clone(true).appendTo($('body'));
+    var menu    = this.menuTemplate.clone(true).appendTo(this.menuContainer).position({ of: event, my: 'left top', collision: 'flipfit' });
     
     this.menus.push(menu[0]);
     
@@ -832,10 +786,7 @@ var Genoverse = Base.extend({
         return true;
       });
       
-      menu.css(position || {
-        top  : offset.top  + 100,
-        left : offset.left + (wrapper.outerWidth(true) - menu.outerWidth(true)) / 2
-      }).show();
+      menu.show();
       
       if (track && track.id) {
         menu.addClass(track.id);

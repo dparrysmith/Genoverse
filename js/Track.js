@@ -207,7 +207,7 @@ Genoverse.Track = Base.extend({
     var f = this[e.target.className === 'labels' ? 'labelPositions' : 'featurePositions'].search({ x: x, y: y, w: 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; })[0];
     
     if (f) {
-      this.browser.makeMenu(f, { left: e.pageX, top: e.pageY }, this);
+      this.browser.makeMenu(f, e, this);
     }
   },
 
@@ -298,6 +298,14 @@ Genoverse.Track = Base.extend({
     this.left  = 0;
     this.scale = this.browser.scale;
     
+    if (this.renderer) {
+      var renderer = this.getRenderer();
+      
+      if (renderer !== this.urlParams.renderer) {
+        this.setRenderer(renderer);
+      }
+    }
+    
     // Don't draw labels if the region is too big
     if (this.maxLabelRegion) {
       if (this.maxLabelRegion < this.browser.length) {
@@ -313,14 +321,6 @@ Genoverse.Track = Base.extend({
     
     if (this.labels && this.labels !== 'overlay') {
       this.dataBuffer.start = Math.max(this.dataBuffer.start, this.browser.labelBuffer);
-    }
-    
-    if (this.renderer) {
-      var renderer = this.getRenderer();
-      
-      if (renderer !== this.urlParams.renderer) {
-        this.setRenderer(renderer);
-      }
     }
     
     this.imgRange[this.browser.scrollStart]    = { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
@@ -346,7 +346,7 @@ Genoverse.Track = Base.extend({
       featurePositions = featurePositions || new RTree();
       
       this.scaleSettings[this.scale] = {
-        imgContainers    : [],
+        imgContainers    : $(),
         heights          : { max: this.height },
         featurePositions : featurePositions,
         labelPositions   : this.labels === 'separate' ? labelPositions || new RTree() : featurePositions
@@ -532,6 +532,7 @@ Genoverse.Track = Base.extend({
       this.makeImage({ start: end + 1,        end: end + length, scale: this.scale, left: this.width  });
     }
     
+    // FIXME: on zoom out, making more than 1 request
     if (this.threshold && this.threshold < length || this.checkDataRange(start, end)) {
       makeImages.call(this);
     } else {
@@ -928,7 +929,7 @@ Genoverse.Track = Base.extend({
   
   disable: function () {
     this.hide();
-    $(this.imgContainers).remove();
+    this.imgContainers.remove();
     this.reset();
     this.disabled = true;
   },
