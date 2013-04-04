@@ -18,7 +18,11 @@
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <script type="text/javascript" src="js/combined.js">
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+    <script src="http://genoverse.org/examples/genoverse.org/config/constants.js"></script>
+    <script src="http://genoverse.org/examples/genoverse.org/config/tracks.js"></script>
+    <script src="http://genoverse.org/js/latest.js">
 
       {
         container      : '#genoverse',
@@ -37,6 +41,7 @@
 
         tracks         : [
           {
+            name : 'Chr 1',
             type : 'Scalebar',
             height : 25,
           },
@@ -46,25 +51,28 @@
           },          
 
           {
-            name    : 'Transcript',
-            type    : 'DAS.Transcript',
-            renderer: 'transcript',
-            filter  : {
-              type  : [ 'transcript', 'translation' ]
-            },
-            populateMenu: function (feature) {
+            name     : 'Transcript',
+            type     : 'DAS.Transcript',
+            source   : 'http://www.ensembl.org/das/Homo_sapiens.GRCh37.transcript',
+            height   : 250,
+            populateMenu     : function (feature) {
               return {
-                title: feature.label,
-                start: feature.start,
-                stop : feature.end,
-                Links: '<a href="#">e!</a>'
+                title    : '<a target="_blank" href="http://www.ensembl.org/Homo_sapiens/transview?t='+ feature.id +'">'+ feature.id +'</a>',
+                Location : this.browser.chr + ':' + feature.start + '-' + feature.end,
+                Length   : (feature.end - feature.start + 1) + ' bp',
+                Type     : feature.type,
               };
-            }
+            }, 
           },
+        ],
 
-        ]
+        tracksLibrary: [ tracksLibrary[0], tracksLibrary[2], tracksLibrary[3], tracksLibrary[4] ],
       }
 
+    </script>
+
+    <script>
+      setTimeout(function(){ $('button[original-title=Tooltips]').click() }, 5000);
     </script>
 
     <!--[if lt IE 9]>
@@ -102,6 +110,8 @@
 
     <p>Genoverse is a portable, customizable, back-end independent genome browser powered by Javascript & HTML5. It allows users to explore data interactively by scrolling and zooming without page reload.</p>
 
+    <p>Please visit genoverse.orgGenoverse is a portable, customizable, back-end independent genome browser powered by Javascript & HTML5. It allows users to explore data interactively by scrolling and zooming without page reload.</p>
+
     <h3>Example:</h3>
     <p>
       <div id="genoverse"></div>
@@ -115,7 +125,7 @@
     <span class="nt">&lt;html&gt;</span>
       <span class="nt">&lt;head&gt;</span>
 
-        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"js/combined.js"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://genoverse.org/js/latest.js"</span><span class="nt">&gt;</span>
           <span class="c1">// Genoverse configuration</span>
           <span class="p">{</span>
             <span class="nx">container</span>      <span class="o">:</span> <span class="s1">'#genoverse'</span><span class="p">,</span> <span class="c1">// CSS/jQuery style for where to inject genoverse</span>
@@ -152,9 +162,6 @@
                 <span class="nx">type</span>    <span class="o">:</span> <span class="s1">'DAS.Transcript'</span><span class="p">,</span>
                 <span class="c1">// For DAS tracks we use 'source' rather than just 'url', DAS tracks will workout url for the data and stylesheet</span>
                 <span class="nx">source</span>  <span class="o">:</span> <span class="s1">'http://www.ensembl.org/das/Homo_sapiens.GRCh37.transcript'</span><span class="p">,</span>
-                <span class="nx">filter</span>  <span class="o">:</span> <span class="p">{</span>
-                  <span class="nx">type</span>  <span class="o">:</span> <span class="p">[</span> <span class="s1">'transcript'</span><span class="p">,</span> <span class="s1">'translation'</span> <span class="p">]</span>
-                <span class="p">},</span>
                 <span class="c1">// populateMenu invoked once user clicks on any feature of the track</span>
                 <span class="c1">// -&gt; feature that user clicks on (JSON object)</span>
                 <span class="c1">// &lt;- json for the menu items</span>
