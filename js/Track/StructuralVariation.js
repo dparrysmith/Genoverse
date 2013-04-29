@@ -102,7 +102,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
     var f = this.featurePositions.search({ x: x, y: y, w: 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; })[0];
     
     if (f && f.breakpoint !== 1) {
-      this.browser.makeMenu(f, { left: e.pageX, top: e.pageY }, this);
+      this.browser.makeMenu(f, e, this);
     }
   }
 });
