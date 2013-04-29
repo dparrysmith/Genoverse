@@ -8,14 +8,12 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
   },
   
   setRenderer: function (renderer, permanent) {
-    if (/nolabel/.test(renderer)) {
-      this.labels = false;
-    }
+    this.labels = !/nolabel/.test(renderer);
     
     if (/transcript/.test(renderer)) {
       this.expanded       = true;
       this.collapsed      = this.blocks = false;
-      this.maxLabelRegion = 2e5;
+      this.maxLabelRegion = 1e6;
       this.featureHeight  = 8;
       this.bumpSpacing    = 2;
     } else if (/collapsed/.test(renderer)) {
