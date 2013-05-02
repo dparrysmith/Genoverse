@@ -684,8 +684,10 @@ var Genoverse = Base.extend({
       
       if (this.prev.scale === this.scale) {
         for (var i in this.tracks) {
-          this.tracks[i].moveTo(this.prev.start);
+          this.tracks[i].move(Math.round((this.prev.start - this.start) * this.scale));
         }
+        
+        this.checkTrackHeights();
       }
     }
     

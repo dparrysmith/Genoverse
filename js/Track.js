@@ -465,11 +465,6 @@ Genoverse.Track = Base.extend({
     }
   },
   
-  moveTo: function (start) {
-    this.move(Math.round((Math.max(start, 1) - this.browser.start) * this.scale));
-    this.checkHeight();
-  },
-  
   makeImage: function (params) {
     params.scaledStart   = params.scaledStart   || params.start * params.scale;
     params.width         = params.width         || this.width;
