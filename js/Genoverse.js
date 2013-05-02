@@ -466,6 +466,11 @@ var Genoverse = Base.extend({
     start = Math.round(this.start - delta / scale);
     end   = start + this.length - 1;
     
+    if (end > this.chromosomeSize) {
+      end   = this.chromosomeSize;
+      start = end - this.length + 1;
+    }
+    
     this.left = left;
     
     for (var i = 0; i < this.tracks.length; i++) {
