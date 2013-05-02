@@ -335,7 +335,6 @@ Genoverse.Track = Base.extend({
       
       this.scaleSettings[this.scale] = {
         imgContainers    : $(),
-        heights          : { max: this.height }, // TODO: get rid of heights.max
         featurePositions : featurePositions,
         labelPositions   : this.labels === 'separate' ? labelPositions || new RTree() : featurePositions
       };
@@ -343,7 +342,7 @@ Genoverse.Track = Base.extend({
     
     var scaleSettings = this.scaleSettings[this.scale];
     
-    $.each([ 'featurePositions', 'labelPositions', 'imgContainers', 'heights' ], function () {
+    $.each([ 'featurePositions', 'labelPositions', 'imgContainers' ], function () {
       track[this] = scaleSettings[this];
     });
     
@@ -501,7 +500,7 @@ Genoverse.Track = Base.extend({
     }
     
     return deferred.done(function () {
-      var features = threshold ? [] : this.findFeatures(params.start, params.end)
+      var features = threshold ? [] : this.findFeatures(params.start, params.end);
       
       this.render(features, image);
       
@@ -718,7 +717,6 @@ Genoverse.Track = Base.extend({
     
     params.featureHeight = Math.max(params.featureHeight, feature.position[scale].bottom);
     params.height        = Math.max(params.height, params.featureHeight + params.labelHeight);
-    this.heights.max     = Math.max(this.heights.max, params.height); // FIXME: remove this.heights.max if possible
   },
   
   bumpFeature: function (bounds, feature, scale, tree) {
