@@ -325,11 +325,6 @@ Genoverse.Track = Base.extend({
       this.dataBuffer.start = Math.max(this.dataBuffer.start, this.browser.labelBuffer);
     }
     
-    this.imgRange[this.scrollStart]    = { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
-    this.scrollRange[this.scrollStart] = { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
-    
-    this.messageContainer.empty();
-    
     if (!this.scaleSettings[this.scale]) {
       featurePositions = featurePositions || new RTree();
       
@@ -340,11 +335,12 @@ Genoverse.Track = Base.extend({
       };
     }
     
-    var scaleSettings = this.scaleSettings[this.scale];
+    $.each(this.scaleSettings[this.scale], function (k, v) { track[k] = v; });
     
-    $.each([ 'featurePositions', 'labelPositions', 'imgContainers' ], function () {
-      track[this] = scaleSettings[this];
-    });
+    this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
+    this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
+    
+    this.messageContainer.empty();
     
     if (this.scrollContainer.children().hide().filter('.' + this.scrollStart).show().length) {
       this.checkHeight();
@@ -472,7 +468,7 @@ Genoverse.Track = Base.extend({
     params.height        = params.height        || this.height;
     params.featureHeight = params.featureHeight || 0;
     params.labelHeight   = params.labelHeight   || 0;
-    
+    // FIXME: if you zoom out while data is loading, wait for it to finish, and then jump back, height = 0
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
     var div       = this.imgContainer.clone().addClass((params.cls + ' loading').replace('.', '_')).css({ left: params.left, display: params.cls === this.scrollStart ? 'block' : 'none' });
