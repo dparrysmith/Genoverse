@@ -463,19 +463,13 @@ var Genoverse = Base.extend({
       delta = this.maxLeft - this.left;
     }
     
-    if (this.left <= this.minLeft) {
-      this.left = this.minLeft;
-      
-      start = this.chromosomeSize - this.length + 1;
-      end   = this.chromosomeSize;
-    } else if (this.left >= this.maxLeft) {
-      this.left = this.maxLeft;
-      
-      start = 1;
-      end   = this.length;
-    } else {
-      start = e ? this.dragStart - (this.left - this.prev.left) / this.scale : this.start - delta / this.scale;
-      end   = start + this.length - 1;
+    start = Math.round(this.start - delta / scale);
+    end   = start + this.length - 1;
+    
+    this.left = left;
+    
+    for (var i = 0; i < this.tracks.length; i++) {
+      this.tracks[i].move(delta);
     }
     
     this.setRange(start, end);
@@ -687,7 +681,7 @@ var Genoverse = Base.extend({
       var length = end - start + 1;
       
       this.setRange(start, end);
-      
+      // FIXME: a back action which changes scale or a zoom out will reset tracks, since scrollStart will not be the same as it was before
       if (this.prev.scale === this.scale) {
         for (var i in this.tracks) {
           this.tracks[i].move(Math.round((this.prev.start - this.start) * this.scale));
