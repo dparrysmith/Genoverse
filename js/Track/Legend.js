@@ -99,7 +99,7 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
       }
     }
     
-    this.height = this.featuresHeight = ((y + (x ? 1 : 0)) * yScale) + pad;
+    this.height = ((y + (x ? 1 : 0)) * yScale) + pad;
     
     params.positioned = true;
     

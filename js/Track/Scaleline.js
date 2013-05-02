@@ -1,10 +1,9 @@
 Genoverse.Track.Scaleline = Genoverse.Track.extend({
-  strand         : 1,
-  color          : '#000000',
-  height         : 12,
-  featuresHeight : 14,
-  labels         : 'overlay',
-  inherit        : [ 'Static' ],
+  strand  : 1,
+  color   : '#000000',
+  height  : 12,
+  labels  : 'overlay',
+  inherit : [ 'Static' ],
   
   resize: $.noop,
   

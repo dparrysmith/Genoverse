@@ -40,7 +40,7 @@ Genoverse.Track.Static = {
         
         this.render(features, this.image.data(params));
         this.imgContainer.children(':last').show();
-        this.resize(this.featuresHeight);
+        this.resize(this.height);
         
         this.stringified = string;
       }
