@@ -463,13 +463,19 @@ var Genoverse = Base.extend({
       delta = this.maxLeft - this.left;
     }
     
-    start = Math.round(this.start - delta / scale);
-    end   = start + this.length - 1;
-    
-    this.left = left;
-    
-    for (var i = 0; i < this.tracks.length; i++) {
-      this.tracks[i].move(delta);
+    if (this.left <= this.minLeft) {
+      this.left = this.minLeft;
+      
+      start = this.chromosomeSize - this.length + 1;
+      end   = this.chromosomeSize;
+    } else if (this.left >= this.maxLeft) {
+      this.left = this.maxLeft;
+      
+      start = 1;
+      end   = this.length;
+    } else {
+      start = e ? this.dragStart - (this.left - this.prev.left) / this.scale : this.start - delta / this.scale;
+      end   = start + this.length - 1;
     }
     
     this.setRange(start, end);
