@@ -141,8 +141,8 @@ Genoverse.Track = Base.extend({
     this.imgContainer     = $('<div class="image_container">').width(this.width);
     this.messageContainer = $('<div class="track_message static">').css('font', this.font).appendTo(this.container);
     this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('index', this.index);
-    this.menus            = $();
     this.context          = $('<canvas>')[0].getContext('2d');
+    this.menus            = $();
     
     if (this.unsortable) {
       this.label.addClass('unsortable');
@@ -468,7 +468,7 @@ Genoverse.Track = Base.extend({
     params.height        = params.height        || this.height;
     params.featureHeight = params.featureHeight || 0;
     params.labelHeight   = params.labelHeight   || 0;
-    // FIXME: if you zoom out while data is loading, wait for it to finish, and then jump back, height = 0
+    
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
     var div       = this.imgContainer.clone().addClass((params.cls + ' loading').replace('.', '_')).css({ left: params.left, display: params.cls === this.scrollStart ? 'block' : 'none' });
@@ -690,24 +690,24 @@ Genoverse.Track = Base.extend({
       };
       
       if (this.bump === true) {
-        this.bumpFeature(bounds, feature, scale, this.featurePositions);
+        this.bumpFeature(bounds, feature, scale, this.scaleSettings[scale].featurePositions);
       }
       
-      this.featurePositions.insert(bounds, feature);
+      this.scaleSettings[scale].featurePositions.insert(bounds, feature);
       
       feature.position[scale].bottom = feature.position[scale].Y + feature.position[scale].H + this.spacing;
       
       if (feature.position[scale].label) {
         var f = $.extend(true, {}, feature); // FIXME: hack to avoid changing feature.position[scale].Y in bumpFeature
         
-        this.bumpFeature(feature.position[scale].label, f, scale, this.labelPositions);
+        this.bumpFeature(feature.position[scale].label, f, scale, this.scaleSettings[scale].labelPositions);
         
         f.position[scale].label        = feature.position[scale].label;
         f.position[scale].label.bottom = f.position[scale].label.y + f.position[scale].label.h + this.spacing;
         
         feature = f;
         
-        this.labelPositions.insert(feature.position[scale].label, feature);
+        this.scaleSettings[scale].labelPositions.insert(feature.position[scale].label, feature);
         
         params.labelHeight = Math.max(params.labelHeight, feature.position[scale].label.bottom);
       }
@@ -725,7 +725,7 @@ Genoverse.Track = Base.extend({
     
     do {
       if (this.depth && ++depth >= this.depth) {
-        if ($.grep(this.featurePositions.search(bounds), function (f) { return f.position[scale].visible !== false; }).length) {
+        if ($.grep(this.scaleSettings[scale].featurePositions.search(bounds), function (f) { return f.position[scale].visible !== false; }).length) {
           feature.position[scale].visible = false;
         }
         
