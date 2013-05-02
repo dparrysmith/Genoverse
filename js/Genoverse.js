@@ -99,7 +99,6 @@ var Genoverse = Base.extend({
       .replace(/(\b(\w+=)?__END__(.)?)/,   '$2(\\d+)$3') + '([;&])'
     ) : '';
     
-    this.history          = {};
     this.prev             = {};
     this.backgrounds      = {};
     this.urlParamTemplate = this.urlParamTemplate || '';
@@ -131,27 +130,27 @@ var Genoverse = Base.extend({
     
     this.container.width(width);
     
-    this.selectorControls = $('                      \
-      <div class="selector_controls">                \
-        <button class="zoomHere">Zoom here</button>  \
-        <button class="center">Center</button>       \
-        <button class="summary">Summary</button>     \
-        <button class="cancel">Cancel</button>       \
-      </div>                                         \
-    ').appendTo(this.selector);
+    this.selectorControls = $(
+      '<div class="selector_controls">'               +
+      '  <button class="zoomHere">Zoom here</button>' +
+      '  <button class="center">Center</button>'      +
+      '  <button class="summary">Summary</button>'    +
+      '  <button class="cancel">Cancel</button>'      +
+      '</div>'
+    ).appendTo(this.selector);
     
-    this.zoomInHighlight = $('     \
-      <div class="canvas_zoom i">  \
-        <div class="t l h"></div>  \
-        <div class="t r h"></div>  \
-        <div class="t l v"></div>  \
-        <div class="t r v"></div>  \
-        <div class="b l h"></div>  \
-        <div class="b r h"></div>  \
-        <div class="b l v"></div>  \
-        <div class="b r v"></div>  \
-      </div>                       \
-    ').appendTo('body');
+    this.zoomInHighlight = $(
+      '<div class="canvas_zoom i">' +
+      '  <div class="t l h"></div>' +
+      '  <div class="t r h"></div>' +
+      '  <div class="t l v"></div>' +
+      '  <div class="t r v"></div>' +
+      '  <div class="b l h"></div>' +
+      '  <div class="b r h"></div>' +
+      '  <div class="b l v"></div>' +
+      '  <div class="b r v"></div>' +
+      '</div>'
+    ).appendTo('body');
     
     this.zoomOutHighlight = this.zoomInHighlight.clone().toggleClass('i o').appendTo('body');
     
@@ -161,7 +160,6 @@ var Genoverse = Base.extend({
     this.chr = coords.chr;
     
     this.setRange(coords.start, coords.end);
-    this.setHistory();
     this.setTracks();
     this.addUserEventHandlers();
   },
@@ -216,10 +214,7 @@ var Genoverse = Base.extend({
       this.tracks[i].reset();
     }
     
-    this.scale   = 9e99; // arbitrary value so that setScale resets track scales as well
-    this.history = {};
-    
-    delete this.prev.history;
+    this.scale = 9e99; // arbitrary value so that setScale resets track scales as well
     
     this.setRange(this.start, this.end);
   },
@@ -446,7 +441,7 @@ var Genoverse = Base.extend({
     }
   },
   
-  move: function (delta, callback) {
+  move: function (delta) {
     var scale = this.scale;
     var start, end, left;
     
@@ -474,7 +469,7 @@ var Genoverse = Base.extend({
     this.left = left;
     
     for (var i = 0; i < this.tracks.length; i++) {
-      this.tracks[i].move(delta, scale);
+      this.tracks[i].move(delta);
     }
     
     this.setRange(start, end);
@@ -509,7 +504,6 @@ var Genoverse = Base.extend({
       this.prev.left   = 0;
       this.minLeft     = Math.round((this.end   - this.chromosomeSize) * this.scale);
       this.maxLeft     = Math.round((this.start - 1) * this.scale);
-      this.scrollStart = 'ss_' + this.start + '_' + this.end;
       this.labelBuffer = Math.ceil(this.textWidth / this.scale) * this.longestLabel;
 
       if (this.prev.scale) {
@@ -676,33 +670,28 @@ var Genoverse = Base.extend({
         window.history.pushState({}, '', this.getQueryString());
       }
     }
-    
-    this.setHistory();
-  },
-  
-  // FIXME: won't work
-  setHistory: function () {
   },
   
   popState: function () {
     var coords = this.getURLCoords();
+    var start  = parseInt(coords.start, 10);
+    var end    = parseInt(coords.end,   10);
     
-    if (coords.start && !(parseInt(coords.start, 10) === this.start && parseInt(coords.end, 10) === this.end)) {
-      this.setRange(coords.start, coords.end, false, false);
+    if (coords.start && !(start === this.start && end === this.end)) {
+      var length = end - start + 1;
       
-      if (!this.updateFromHistory()) {
-        this.reset();
+      this.setRange(start, end);
+      
+      if (this.prev.scale === this.scale) {
+        for (var i in this.tracks) {
+          this.tracks[i].moveTo(this.prev.start);
+        }
       }
     }
     
     var delta = Math.round((this.start - this.prev.start) * this.scale);
     
     $('.gv_menu', this.menuContainer).css('left', function (i, left) { return parseFloat(left, 10) - delta; });
-  },
-  
-  // FIXME: won't work
-  updateFromHistory: function () {
-    return false;
   },
   
   getURLCoords: function () {

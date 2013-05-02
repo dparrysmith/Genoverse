@@ -19,7 +19,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   },
   
   reset: function () {
-    this.container.children('.image_container').remove();
+    this.scrollContainer.children('.image_container').remove();
     this.init();
   },
   

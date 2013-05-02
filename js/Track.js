@@ -61,6 +61,7 @@ Genoverse.Track = Base.extend({
     this.minLabelHeight = 0;
     this.font           = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
     this.labelUnits     = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
+    this.scrollStart    = 'ss_' + this.browser.start + '_' + this.browser.end;
     
     if (this.hidden) {
       this.height  = 0;
@@ -105,7 +106,7 @@ Genoverse.Track = Base.extend({
   },
   
   reset: function () {
-    this.container.children('.image_container').remove();
+    this.scrollContainer.children('.image_container').remove();
     
     if (this.url !== false) {
       this.init();
@@ -138,15 +139,15 @@ Genoverse.Track = Base.extend({
     this.container        = $('<div class="track_container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
     this.imgContainer     = $('<div class="image_container">').width(this.width);
-    this.messageContainer = $('<div class="track_message static" />').css('font', this.font).appendTo(this.container);
+    this.messageContainer = $('<div class="track_message static">').css('font', this.font).appendTo(this.container);
     this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('index', this.index);
     this.menus            = $();
-    this.context          = $('<canvas />')[0].getContext('2d');
+    this.context          = $('<canvas>')[0].getContext('2d');
     
     if (this.unsortable) {
       this.label.addClass('unsortable');
     } else {
-      $('<div class="handle"></div>').appendTo(this.label);
+      $('<div class="handle">').appendTo(this.label);
     }
     
     this.minLabelHeight = $('<span class="name" title="' + (this.name || '') + '">' + (this.name || '') + '</span>').appendTo(this.label).outerHeight(true);
@@ -215,7 +216,7 @@ Genoverse.Track = Base.extend({
     if (this.threshold && this.browser.length > this.threshold) {
       this.fullVisibleHeight = this.thresholdMessage ? this.messageContainer.height() : 0;
     } else {
-      var bounds = { x: this.browser.scaledStart, w: this.width, y: 0, h: this.heights.max };
+      var bounds = { x: this.browser.scaledStart, w: this.width, y: 0, h: 9e99 };
       var scale  = this.scale;
       var height = Math.max.apply(Math, $.map(this.featurePositions.search(bounds), function (feature) { return feature.position[scale].bottom; }).concat(0));
       
@@ -295,8 +296,9 @@ Genoverse.Track = Base.extend({
     var track = this;
     var featurePositions, labelPositions;
     
-    this.left  = 0;
-    this.scale = this.browser.scale;
+    this.left        = 0;
+    this.scale       = this.browser.scale;
+    this.scrollStart = 'ss_' + this.browser.start + '_' + this.browser.end;
     
     if (this.renderer) {
       var renderer = this.getRenderer();
@@ -323,31 +325,17 @@ Genoverse.Track = Base.extend({
       this.dataBuffer.start = Math.max(this.dataBuffer.start, this.browser.labelBuffer);
     }
     
-    this.imgRange[this.browser.scrollStart]    = { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
-    this.scrollRange[this.browser.scrollStart] = { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
+    this.imgRange[this.scrollStart]    = { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
+    this.scrollRange[this.scrollStart] = { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
     this.messageContainer.empty();
-    
-    // Reset scaleSettings if the user has zoomed back to a previously existent zoom level, but has scrolled to a new region.
-    // This is needed to get the newly created images in the right place.
-    // Sadly we have to throw away all other images generated at this zoom level for it to work, 
-    // since the new image probably won't fit exactly with the positioning of the old images,
-    // and there would probably be a gap between this image and the old ones.
-    if (this.scaleSettings[this.scale] && !this.browser.history[this.browser.start + '-' + this.browser.end]) {
-      featurePositions = this.scaleSettings[this.scale].featurePositions;
-      labelPositions   = this.scaleSettings[this.scale].labelPositions;
-      
-      this.container.children('.' + this.browser.scrollStart).remove();
-      
-      delete this.scaleSettings[this.scale];
-    }
     
     if (!this.scaleSettings[this.scale]) {
       featurePositions = featurePositions || new RTree();
       
       this.scaleSettings[this.scale] = {
         imgContainers    : $(),
-        heights          : { max: this.height },
+        heights          : { max: this.height }, // TODO: get rid of heights.max
         featurePositions : featurePositions,
         labelPositions   : this.labels === 'separate' ? labelPositions || new RTree() : featurePositions
       };
@@ -359,8 +347,12 @@ Genoverse.Track = Base.extend({
       track[this] = scaleSettings[this];
     });
     
-    this.scrollContainer.css('left', 0).children('.image_container').hide();
-    this.makeFirstImage();
+    if (this.scrollContainer.children().hide().filter('.' + this.scrollStart).show().length) {
+      this.checkHeight();
+    } else {
+      this.scrollContainer.css('left', 0);
+      this.makeFirstImage();
+    }
   },
   
   setRenderer: function (renderer, permanent) {
@@ -438,17 +430,17 @@ Genoverse.Track = Base.extend({
     }
   },
   
-  move: function (delta, scale) {
+  move: function (delta) {
     this.left += delta;
     this.scrollContainer.css('left', this.left);
     
-    var scrollStart = this.browser.scrollStart;
+    var scrollStart = this.scrollStart;
     
     if (this.imgRange[scrollStart].left + this.left > -this.scrollBuffer * this.width) {
       var end = this.scrollRange[scrollStart].start - 1;
       
       this.makeImage({
-        scale : scale,
+        scale : this.browser.scale,
         start : end - this.browser.length + 1,
         end   : end,
         left  : this.imgRange[scrollStart].left
@@ -462,7 +454,7 @@ Genoverse.Track = Base.extend({
       var start = this.scrollRange[scrollStart].end + 1;
       
       this.makeImage({
-        scale : scale,
+        scale : this.browser.scale,
         start : start,
         end   : start + this.browser.length - 1,
         left  : this.imgRange[scrollStart].right
@@ -471,8 +463,11 @@ Genoverse.Track = Base.extend({
       this.imgRange[scrollStart].right  += this.width;
       this.scrollRange[scrollStart].end += this.browser.length;
     }
-    
-    return false;
+  },
+  
+  moveTo: function (start) {
+    this.move(Math.round((Math.max(start, 1) - this.browser.start) * this.scale));
+    this.checkHeight();
   },
   
   makeImage: function (params) {
@@ -484,7 +479,7 @@ Genoverse.Track = Base.extend({
     
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
-    var div       = this.imgContainer.clone().addClass((this.browser.scrollStart + ' loading').replace('.', '_')).css('left', params.left);
+    var div       = this.imgContainer.clone().addClass((this.scrollStart + ' loading').replace('.', '_')).css('left', params.left);
     var bgImage   = params.background ? $('<img class="bg" />').addClass(params.background).data(params).prependTo(div) : false;
     var image     = $('<img class="data" />').hide().data(params).appendTo(div).load(function () {
       $(this).fadeIn('fast').parent().removeClass('loading');
