@@ -439,10 +439,11 @@ Genoverse.Track = Base.extend({
       var end = this.scrollRange[scrollStart].start - 1;
       
       this.makeImage({
-        scale : this.browser.scale,
+        scale : this.scale,
         start : end - this.browser.length + 1,
         end   : end,
-        left  : this.imgRange[scrollStart].left
+        left  : this.imgRange[scrollStart].left,
+        cls   : scrollStart
       });
       
       this.imgRange[scrollStart].left     -= this.width;
@@ -453,10 +454,11 @@ Genoverse.Track = Base.extend({
       var start = this.scrollRange[scrollStart].end + 1;
       
       this.makeImage({
-        scale : this.browser.scale,
+        scale : this.scale,
         start : start,
         end   : start + this.browser.length - 1,
-        left  : this.imgRange[scrollStart].right
+        left  : this.imgRange[scrollStart].right,
+        cls   : scrollStart
       });
       
       this.imgRange[scrollStart].right  += this.width;
@@ -473,7 +475,7 @@ Genoverse.Track = Base.extend({
     
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
-    var div       = this.imgContainer.clone().addClass((this.scrollStart + ' loading').replace('.', '_')).css('left', params.left);
+    var div       = this.imgContainer.clone().addClass((params.cls + ' loading').replace('.', '_')).css({ left: params.left, display: params.cls === this.scrollStart ? 'block' : 'none' });
     var bgImage   = params.background ? $('<img class="bg" />').addClass(params.background).data(params).prependTo(div) : false;
     var image     = $('<img class="data" />').hide().data(params).appendTo(div).load(function () {
       $(this).fadeIn('fast').parent().removeClass('loading');
@@ -514,11 +516,13 @@ Genoverse.Track = Base.extend({
     var start  = this.browser.start;
     var end    = this.browser.end;
     var length = this.browser.length;
+    var scale  = this.scale;
+    var cls    = this.scrollStart;
     
     function makeImages() {
-      this.makeImage({ start: start,          end: end,          scale: this.scale, left: 0           });
-      this.makeImage({ start: start - length, end: start - 1,    scale: this.scale, left: -this.width });
-      this.makeImage({ start: end + 1,        end: end + length, scale: this.scale, left: this.width  });
+      this.makeImage({ start: start,          end: end,          scale: scale, cls: cls, left: 0           });
+      this.makeImage({ start: start - length, end: start - 1,    scale: scale, cls: cls, left: -this.width });
+      this.makeImage({ start: end + 1,        end: end + length, scale: scale, cls: cls, left: this.width  });
     }
     
     // FIXME: on zoom out, making more than 1 request
@@ -917,7 +921,7 @@ Genoverse.Track = Base.extend({
   
   disable: function () {
     this.hide();
-    this.imgContainers.remove();
+    this.scrollContainer.css('left', 0);
     this.reset();
     this.disabled = true;
   },
@@ -925,7 +929,7 @@ Genoverse.Track = Base.extend({
   enable: function () {
     this.show();
     this.disabled = false;
-    this.makeImage(this.browser.start, this.browser.end, this.width, -this.browser.left);
+    this.makeFirstImage();
   },
   
   message: function (text) {
