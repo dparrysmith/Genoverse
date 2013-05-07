@@ -10,11 +10,10 @@ var Genoverse = Base.extend({
   trackSpacing     : 2,
   defaultLength    : 5000,
   tracks           : [],
-  tracksById       : {},
-  menus            : $(),
   plugins          : [],
   dragAction       : 'scroll', // options are: scroll, select, off
   wheelAction      : 'off',    // options are: zoom, off
+  genome           : undefined,
   colors           : {
     background     : '#FFFFFF',
     majorGuideLine : '#CCCCCC',
@@ -91,22 +90,43 @@ var Genoverse = Base.extend({
       return this.die('You must supply a ' + (this.container ? 'valid ' : '') + 'container element');
     }
     
-    this.container.addClass('canvas_container');
+    this.addDomElements(width);
+    this.addUserEventHandlers();
     
-    this.paramRegex = this.urlParamTemplate ? new RegExp('([?&;])' + this.urlParamTemplate
+    this.tracksById       = {};
+    this.prev             = {};
+    this.urlParamTemplate = this.urlParamTemplate || '';
+    this.useHash          = typeof window.history.pushState !== 'function';
+    this.proxy            = $.support.cors ? false : this.proxy;
+    this.textWidth        = document.createElement('canvas').getContext('2d').measureText('W').width;
+    this.labelWidth       = this.labelContainer.outerWidth(true);
+    this.wrapperLeft      = this.labelWidth - width;
+    this.width           -= this.labelWidth;
+    this.paramRegex       = this.urlParamTemplate ? new RegExp('([?&;])' + this.urlParamTemplate
       .replace(/(\b(\w+=)?__CHR__(.)?)/,   '$2([\\w\\.]+)$3')
       .replace(/(\b(\w+=)?__START__(.)?)/, '$2(\\d+)$3')
       .replace(/(\b(\w+=)?__END__(.)?)/,   '$2(\\d+)$3') + '([;&])'
     ) : '';
     
-    this.prev             = {};
-    this.backgrounds      = {};
-    this.urlParamTemplate = this.urlParamTemplate || '';
-    this.useHash          = typeof window.history.pushState !== 'function';
-    this.proxy            = $.support.cors ? false : this.proxy;
-    this.textWidth        = document.createElement('canvas').getContext('2d').measureText('W').width;
-    this.menuContainer    = $('<div class="menu_container">').css({ width: width - 1, left: 1 }).appendTo(this.container);
-    this.labelContainer   = $('<ul class="label_container">').appendTo(this.container).sortable({
+    var urlCoords = this.getURLCoords();
+    var coords    = urlCoords.chr && urlCoords.start && urlCoords.end ? urlCoords : { chr: this.chr, start: this.start, end: this.end };
+    
+    this.chr = coords.chr;
+    
+    if (this.genome && !this.chromosomeSize) {
+      this.chromosomeSize = this.genome[this.chr].size;
+    }
+    
+    this.setRange(coords.start, coords.end);
+    this.setTracks();
+  },
+  
+  addDomElements: function (width) {
+    var browser = this;
+    
+    this.menus          = $();
+    this.menuContainer  = $('<div class="menu_container">').css({ width: width - 1, left: 1 }).appendTo(this.container); // FIXME: not needed if not scrolling menus
+    this.labelContainer = $('<ul class="label_container">').appendTo(this.container).sortable({
       items       : 'li:not(.unsortable)',
       handle      : '.handle',
       placeholder : 'label',
@@ -118,18 +138,13 @@ var Genoverse = Base.extend({
         ui.helper.hide();
       },
       update      : function (e, ui) {
-        browser.tracks[ui.item.data('index')].container[ui.item[0].previousSibling ? 'insertAfter' : 'insertBefore'](browser.tracks[$(ui.item[0].previousSibling || ui.item[0].nextSibling).data('index')].container);
+        ui.item.data('track').container[ui.item[0].previousSibling ? 'insertAfter' : 'insertBefore']($(ui.item[0].previousSibling || ui.item[0].nextSibling).data('track').container);
+        browser.tracks = browser.labelContainer.children('li').map(function () { return $(this).data('track'); }); // Correct the order
       }
     });
     
-    this.labelWidth  = this.labelContainer.outerWidth(true);
-    this.wrapperLeft = this.labelWidth - width;
-    this.width      -= this.labelWidth;
-    this.wrapper     = $('<div class="gv_wrapper">').appendTo(this.container);
-    this.selector    = $('<div class="selector crosshair"></div>').appendTo(this.wrapper);
-    
-    this.container.width(width);
-    
+    this.wrapper          = $('<div class="gv_wrapper">').appendTo(this.container);
+    this.selector         = $('<div class="selector crosshair">').appendTo(this.wrapper);
     this.selectorControls = $(
       '<div class="selector_controls">'               +
       '  <button class="zoomHere">Zoom here</button>' +
@@ -154,14 +169,7 @@ var Genoverse = Base.extend({
     
     this.zoomOutHighlight = this.zoomInHighlight.clone().toggleClass('i o').appendTo('body');
     
-    var urlCoords = this.getURLCoords();
-    var coords    = urlCoords.chr && urlCoords.start && urlCoords.end ? urlCoords : { chr: this.chr, start: this.start, end: this.end };
-    
-    this.chr = coords.chr;
-    
-    this.setRange(coords.start, coords.end);
-    this.setTracks();
-    this.addUserEventHandlers();
+    this.container.addClass('canvas_container').width(width);
   },
   
   addUserEventHandlers: function () {
@@ -182,6 +190,9 @@ var Genoverse = Base.extend({
         } else if (browser.wheelAction === 'zoom') {
           return browser.mousewheelZoom(e, delta);
         }
+      },
+      dblclick: function (e) {
+        browser.mousewheelZoom(e, 1);
       }
     }, '.image_container, .overlay, .selector, .track_message');
     
@@ -190,7 +201,7 @@ var Genoverse = Base.extend({
       
       switch (e.target.className) {
         case 'zoomHere' : browser.setRange(pos.start, pos.end, true); break;
-        case 'center'   : browser.startDragScroll(); browser.move(null, browser.width / 2 - (pos.left + pos.width / 2), 'fast', $.proxy(browser.stopDragScroll, browser)); break;
+        case 'center'   : browser.startDragScroll(); browser.move(browser.width / 2 - (pos.left + pos.width / 2)); browser.stopDragScroll; break;
         case 'summary'  : browser.summary(pos.start, pos.end); break;
         case 'cancel'   : browser.cancelSelect(); break;
         default         : break;
@@ -341,12 +352,12 @@ var Genoverse = Base.extend({
   },
   
   dragSelect: function (e) {
-    var x = e.pageX - this.wrapper.offset().left - 2;
+    var x = e.pageX - this.wrapper.offset().left;
 
     if (x > this.selectorStart) {
       this.selector.css({ 
         left  : this.selectorStart, 
-        width : Math.min(x - this.selectorStart, this.width - this.selectorStart) - 4
+        width : Math.min(x - this.selectorStart, this.width - this.selectorStart - 1)
       });
     } else {
       this.selector.css({ 
@@ -386,6 +397,9 @@ var Genoverse = Base.extend({
   keydown: function (e) {
     if (e.which === 16 && !this.prev.dragAction && this.dragAction === 'scroll') { // shift key
       this.toggleSelect(true);
+    } else if (e.which === 27) {
+      this.cancelSelect();
+      this.closeMenus();
     }
   },
   
@@ -623,32 +637,30 @@ var Genoverse = Base.extend({
     return tracks;
   },
   
+  addTrack: function (track) {
+    this.addTracks([ track ]);
+  },
+  
   addTracks: function (tracks) {
     this.setTracks(tracks, this.tracks.length);
     this.sortTracks();
-    this.updateTracks();
   },
   
-  removeTracks: function (tracks) {
-    var i = tracks.sort(function (a, b) { return a.index - b.index; }).length; // tracks must be ordered low to high by index for splice to work correctly (splice is done in track.remove())
-    
-    while (i--) {
-      tracks[i].remove();
-    }
-    
-    this.updateTracks();
-  },
-  
-  updateTracks: function () {
-    var i = this.tracks.length;
-    
-    while (i--) {
-      // correct track index
-      if (this.tracks[i].index !== i) {
-        this.tracks[i].index = i;
-        this.tracks[i].label.data('index', i);
+  removeTrack: function (track) {
+    // splice tracks array
+    for (var i = 0; i < this.tracks.length; i++) {
+      if (track == this.tracks[i]) {
+        this.tracks.splice(i, 1);
+        break;
       }
     }
+    
+    if (track.id) {
+      delete this.tracksById[track.id];
+    }
+    
+    // Destroy DOM elements and track itself
+    track.remove();
   },
   
   sortTracks: function () {
@@ -754,46 +766,48 @@ var Genoverse = Base.extend({
   }),
   
   makeMenu: function (feature, event, track) {
-    var wrapper = this.wrapper;
-    var offset  = wrapper.offset();
-    var menu    = this.menuTemplate.clone(true).appendTo(this.menuContainer).position({ of: event, my: 'left top', collision: 'flipfit' });
-    
-    this.menus.push(menu[0]);
-    
-    if (track) {
-      track.menus.push(menu[0]);
-    }
-    
-    $.when(track ? track.populateMenu(feature) : feature).done(function (feature) {
-      if (Object.prototype.toString.call(feature) !== '[object Array]') {
-        feature = [ feature ];
+    if (!feature.menuEl) {
+      var wrapper = this.wrapper;
+      var offset  = wrapper.offset();
+      var menu    = this.menuTemplate.clone(true);
+      
+      this.menus.push(menu[0]);
+      
+      if (track) {
+        track.menus.push(menu[0]);
       }
       
-      feature.every(function (f) {
-        $('table', menu).append(
-          (f.title ? '<tr class="header"><th colspan="2" class="title">' + f.title + '</th></tr>' : '') +
-          $.map(f, function (value, key) {
-            if (key !== 'title') {
-              return '<tr><td>'+ key +'</td><td>'+ value +'</td></tr>';
-            }
-          }).join()
-        );
+      $.when(track ? track.populateMenu(feature) : feature).done(function (feature) {
+        if (Object.prototype.toString.call(feature) !== '[object Array]') {
+          feature = [ feature ];
+        }
         
-        return true;
+        feature.every(function (f) {
+          $('table', menu).append(
+            (f.title ? '<tr class="header"><th colspan="2" class="title">' + f.title + '</th></tr>' : '') +
+            $.map(f, function (value, key) {
+              if (key !== 'title') {
+                return '<tr><td>'+ key +'</td><td>'+ value +'</td></tr>';
+              }
+            }).join()
+          );
+          
+          return true;
+        });
+        
+        if (track && track.id) {
+          menu.addClass(track.id);
+        }
       });
       
-      menu.show();
-      
-      if (track && track.id) {
-        menu.addClass(track.id);
-      }
-    });
+      feature.menuEl = menu;
+    }
     
-    return menu;
+    return feature.menuEl.appendTo(this.menuContainer).position({ of: event, my: 'left top', collision: 'flipfit' });
   },
   
   closeMenus: function () {
-    this.menus.fadeOut('fast', function () { $(this).remove(); });
+    this.menus.children('.close').trigger('click');
     this.menus = $();
   },
   

@@ -1,23 +1,27 @@
 Genoverse.Track = Base.extend({
   height         : 12,
-  dataType       : 'json',
-  color          : '#000000',
+  bumpSpacing    : 2,
+  featureSpacing : 1,
+  minScaledWidth : 0.5,
   fontHeight     : 10,
-  scrollBuffer   : 1,//1.2,              // number of widths, if left of right closer to the edges of viewpoint than the buffer, start making more images
-  dataBuffer     : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
   fontFamily     : 'sans-serif',
   fontWeight     : 'normal',
   fontColor      : '#000000',
+  color          : '#000000',
   labels         : true,
   bump           : false,
-  bumpSpacing    : 2,
-  featureSpacing : 1,
   urlParams      : {},
   urlTemplate    : {},
-  inherit        : [],
   xhrFields      : {},
-  imgRange       : {},
-  scrollRange    : {},
+  dataType       : 'json',
+  dataBuffer     : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
+  scrollBuffer   : 1,//1.2,              // number of widths, if left of right closer to the edges of viewpoint than the buffer, start making more images
+  inherit        : [],
+  messages       : {
+    error     : 'ERROR: ',
+    threshold : 'Data for this track is not displayed in regions greater than ', // + this.formatLabel(this.threshold)
+    resize    : 'Some features are currently hidden, resize to see all'
+  },
   
   constructor: function (config) {
     var deepCopy = {};
@@ -51,6 +55,8 @@ Genoverse.Track = Base.extend({
       }
     }
     
+    this.imgRange       = {};
+    this.scrollRange    = {};
     this.order          = typeof this.order       !== 'undefined' ? this.order       : this.index;
     this.spacing        = typeof this.spacing     !== 'undefined' ? this.spacing     : this.browser.trackSpacing;
     this.fixedHeight    = typeof this.fixedHeight !== 'undefined' ? this.fixedHeight : this.featureHeight === this.height && !this.bump;
@@ -64,13 +70,14 @@ Genoverse.Track = Base.extend({
     this.scrollStart    = 'ss_' + this.browser.start + '_' + this.browser.end;
     
     if (this.hidden) {
-      this.height  = 0;
+      this.height = 0;
     }
     
     if (this.autoHeight === 'force') {
       this.autoHeight  = true;
       this.fixedHeight = false;
       this.resizable   = false;
+      
     } else if (this.threshold) {
       this.thresholdMessage = true;
     }
@@ -106,11 +113,23 @@ Genoverse.Track = Base.extend({
   },
   
   reset: function () {
-    this.scrollContainer.children('.image_container').remove();
+    this.resetImages();
     
     if (this.url !== false) {
       this.init();
     }
+  },
+  
+  resetImages: function () {
+    this.imgRange = {};
+    this.scrollContainer.children('.image_container').remove();
+  },
+  
+  rename: function (name) {
+    this.name           = name;
+    this.minLabelHeight = $('span.name', this.label).html(this.name).outerHeight(true);
+    
+    this.label.height(this.hidden ? 0 : Math.max(this.height, this.minLabelHeight));
   },
   
   setURL: function () {
@@ -139,8 +158,9 @@ Genoverse.Track = Base.extend({
     this.container        = $('<div class="track_container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
     this.imgContainer     = $('<div class="image_container">').width(this.width);
-    this.messageContainer = $('<div class="track_message static">').css('font', this.font).appendTo(this.container);
-    this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('index', this.index);
+    this.border           = $('<div class="track_border">').appendTo(this.container);
+    this.messageContainer = $('<div class="message_container"><div class="messages"></div><a class="control">&laquo;</a></div>').appendTo(this.container);
+    this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('track', this);
     this.context          = $('<canvas>')[0].getContext('2d');
     this.menus            = $();
     
@@ -193,13 +213,10 @@ Genoverse.Track = Base.extend({
 
       track.click(e);
     });
-  },
-  
-  rename: function (name) {
-    this.name           = name;
-    this.minLabelHeight = $('span.name', this.label).html(this.name).outerHeight(true);
     
-    this.label.height(this.hidden ? 0 : Math.max(this.height, this.minLabelHeight));
+    this.messageContainer.children('.message_container_control').on('click', function () {
+      $(this).html($(this).parent().toggleClass('collapsed').hasClass('collapsed') ? '&raquo;' : '&laquo;');
+    });
   },
   
   click: function (e) {
@@ -211,10 +228,38 @@ Genoverse.Track = Base.extend({
       this.browser.makeMenu(f, e, this);
     }
   },
-
+  
+  showMessage: function (code, additionalText) {
+    if (!this.messageContainer.find('.' + code).length) {
+      this.messageContainer.children('.messages').prepend('<div class="' + code + '">' + (this.messages[code] || this.browser.messages[code]) + (additionalText || '') + '</div>').end().show();
+    }
+  },
+  
+  hideMessage: function (code) {
+    var messages = this.messageContainer.children('.messages');
+    
+    if (code) {
+      messages.children('.' + code).remove();
+      
+      if (!messages.children().length) {
+        this.messageContainer.hide();
+      }
+    } else {
+      messages.empty();
+      this.messageContainer.hide();
+    }
+    
+    messages = null;
+  },
+  
   checkHeight: function () {
+    var autoHeight;
+    
     if (this.threshold && this.browser.length > this.threshold) {
-      this.fullVisibleHeight = this.thresholdMessage ? this.messageContainer.height() : 0;
+      autoHeight = this.autoHeight;
+      
+      this.fullVisibleHeight = this.thresholdMessage ? this.messageContainer.outerHeight(true) : 0;
+      this.autoHeight        = true;
     } else {
       var bounds = { x: this.browser.scaledStart, w: this.width, y: 0, h: 9e99 };
       var scale  = this.scale;
@@ -225,14 +270,14 @@ Genoverse.Track = Base.extend({
         height += Math.max.apply(Math, $.map(this.labelPositions.search(bounds), function (feature) { return feature.position[scale].label.bottom; }).concat(0));
       }
       
-      if (!height && this.errorMessage) {
-        height = this.errorMessage.height;
-      }
-      
-      this.fullVisibleHeight = height;
+      this.fullVisibleHeight = height || this.messageContainer.outerHeight(true);
     }
     
     this.autoResize();
+    
+    if (typeof autoHeight !== 'undefined') {
+      this.autoHeight = autoHeight;
+    }
   },
   
   autoResize: function () {
@@ -275,17 +320,22 @@ Genoverse.Track = Base.extend({
     // this.fullVisibleHeight - ([there are labels in this region] ? (this.labels === 'separate' ? 0 : this.bumpSpacing + 1) + 2 : this.bumpSpacing)
     //                                                                ^ padding on label y-position                            ^ margin on label height
     if (this.fullVisibleHeight - this.bumpSpacing > this.height) {
+      this.showMessage('resize');
       this.expander = (this.expander || $('<div class="expander static">').width(this.width).appendTo(this.container).on('click', function () {
         track.resize(track.fullVisibleHeight);
       }))[this.height === 0 ? 'hide' : 'show']();
     } else if (this.expander) {
+      this.hideMessage('resize');
       this.expander.hide();
-    }    
+    }
   },
   
   remove: function () {
     this.container.add(this.label).add(this.menus).remove();
-    this.browser.tracks.splice(this.index, 1);
+    
+    for (var key in this) {
+      delete this[key];
+    }
   },
   
   setWidth: function (width) {
@@ -340,7 +390,7 @@ Genoverse.Track = Base.extend({
     this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
     this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
-    this.messageContainer.empty();
+    this.messageContainer.children('.messages').empty();
     
     if (this.scrollContainer.children().hide().filter('.' + this.scrollStart).show().length) {
       this.checkHeight();
@@ -484,7 +534,7 @@ Genoverse.Track = Base.extend({
     
     if (threshold) {
       if (this.thresholdMessage) {
-        this.message('This data is not displayed in regions greater than ' + this.formatLabel(this.threshold));
+        this.showMessage('threshold', this.formatLabel(this.threshold));
       }
     } else if (!this.checkDataRange(params.start, params.end)) {
       params.start -= this.dataBuffer.start;
@@ -630,6 +680,10 @@ Genoverse.Track = Base.extend({
           width  : (feature.end - feature.start) * scale + add,
           height : feature.height || this.featureHeight
         };
+        
+        if (feature.position[scale].width < this.minScaledWidth) {
+          feature.position[scale].width = this.minScaledWidth;
+        }
       }
     }
     
@@ -773,7 +827,7 @@ Genoverse.Track = Base.extend({
   },
   
   renderBackground: function (features, img, height) {
-    var canvas = $('<canvas />').attr({ width: this.width, height: height || 1 })[0];
+    var canvas = $('<canvas>').attr({ width: this.width, height: height || 1 })[0];
     this.drawBackground(features, canvas.getContext('2d'), img.data());
     img.attr('src', canvas.toDataURL());
     $(canvas).remove();
@@ -857,14 +911,8 @@ Genoverse.Track = Base.extend({
     feature.width       = Math.max(width, 0);
   },
   
-  showError: function () {
-    console.log(arguments);
-    // if (!this.errorMessage) {
-    //   this.errorMessage = this.browser.setTracks([{ type: 'Error', track: this }], this.browser.tracks.length)[0];
-    // }
-    
-    // this.errorMessage.draw(this.imgContainers[0], error);
-    // deferred.resolve({ target: image.images, img: image });
+  showError: function (error) {
+    this.showMessage('error', error);
   },
   
   getQueryString: function (start, end) {
@@ -926,11 +974,6 @@ Genoverse.Track = Base.extend({
     this.show();
     this.disabled = false;
     this.makeFirstImage();
-  },
-  
-  message: function (text) {
-    var width = this.context.measureText(text).width;
-    this.messageContainer.css({ width: width, left: Math.abs(this.width - width) / 2 }).text(text);
   },
   
   drawBackground      : $.noop,
