@@ -270,7 +270,7 @@ Genoverse.Track = Base.extend({
         height += Math.max.apply(Math, $.map(this.labelPositions.search(bounds), function (feature) { return feature.position[scale].label.bottom; }).concat(0));
       }
       
-      this.fullVisibleHeight = height || this.messageContainer.outerHeight(true);
+      this.fullVisibleHeight = height || (this.messageContainer.is(':visible') ? this.messageContainer.outerHeight(true) : 0);
     }
     
     this.autoResize();
@@ -321,6 +321,13 @@ Genoverse.Track = Base.extend({
     //                                                                ^ padding on label y-position                            ^ margin on label height
     if (this.fullVisibleHeight - this.bumpSpacing > this.height) {
       this.showMessage('resize');
+      
+      var height = this.messageContainer.outerHeight(true);
+      
+      if (height > this.height) {
+        this.resize(height);
+      }
+      
       this.expander = (this.expander || $('<div class="expander static">').width(this.width).appendTo(this.container).on('click', function () {
         track.resize(track.fullVisibleHeight);
       }))[this.height === 0 ? 'hide' : 'show']();
