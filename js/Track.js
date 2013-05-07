@@ -159,7 +159,7 @@ Genoverse.Track = Base.extend({
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
     this.imgContainer     = $('<div class="image_container">').width(this.width);
     this.border           = $('<div class="track_border">').appendTo(this.container);
-    this.messageContainer = $('<div class="message_container"><div class="messages"></div><a class="control">&laquo;</a></div>').appendTo(this.container);
+    this.messageContainer = $('<div class="message_container"><div class="messages"></div><span class="control">&laquo;</span></div>').appendTo(this.container);
     this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('track', this);
     this.context          = $('<canvas>')[0].getContext('2d');
     this.menus            = $();
@@ -214,7 +214,7 @@ Genoverse.Track = Base.extend({
       track.click(e);
     });
     
-    this.messageContainer.children('.message_container_control').on('click', function () {
+    this.messageContainer.children('.control').on('click', function () {
       $(this).html($(this).parent().toggleClass('collapsed').hasClass('collapsed') ? '&raquo;' : '&laquo;');
     });
   },

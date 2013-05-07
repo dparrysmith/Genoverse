@@ -77,7 +77,7 @@ body.mac .canvas_container .label_container li .handle   { cursor: ns-resize; }
 }
 .canvas .genoverse_controls div.left                     { border-radius: 5px 0 0 5px; border-right: none; }
 .canvas .genoverse_controls div.right                    { border-radius: 0 5px 5px 0; }
-.canvas .genoverse_controls button                       { position: absolute; top: 0; left: 50%; height: 100%; width: 16px; margin-left: -8px; border: 0; background: url(/i/controls.png) no-repeat; cursor: pointer; outline: 0; }
+.canvas .genoverse_controls button                       { position: absolute; top: 0; left: 50%; height: 100%; width: 16px; margin-left: -8px; border: 0; background: url(/i/controls.png); cursor: pointer; outline: 0; }
 .canvas .genoverse_controls button.scroll_left           { background-position:   0px   1px; }
 .canvas .genoverse_controls button.scroll_right          { background-position:   0px -17px; }
 .canvas .genoverse_controls button.zoom_in               { background-position: -17px   1px; }
