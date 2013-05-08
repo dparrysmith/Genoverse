@@ -1,10 +1,26 @@
 Genoverse.Track.StructuralVariation = Genoverse.Track.extend({ 
   height : 100,
-  bump   : true,
   
   init: function () {
     this.decorationHeight = this.featureHeight - 1;
     this.base();
+    this.setRenderer(this.renderer, true);
+  },
+  
+  setRenderer: function (renderer, permanent) {
+    if (renderer === 'compact') {
+      this.depth         = 1;
+      this.bump          = false;
+      this.featureHeight = 12;
+    } else {
+      this.depth         = false;
+      this.bump          = true;
+      this.featureHeight = 6;
+    }
+    
+    if (this.urlParams.renderer !== renderer || permanent) {
+      this.base(renderer, permanent);
+    }
   },
   
   positionFeature: function (feature, params) {
