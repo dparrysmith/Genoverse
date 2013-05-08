@@ -573,16 +573,18 @@ Genoverse.Track = Base.extend({
   },
   
   makeFirstImage: function () {
-    var start  = this.browser.start;
-    var end    = this.browser.end;
-    var length = this.browser.length;
-    var scale  = this.scale;
-    var cls    = this.scrollStart;
+    var start   = this.browser.start;
+    var end     = this.browser.end;
+    var length  = this.browser.length;
+    var scale   = this.scale;
+    var cls     = this.scrollStart;
+    var loading = this.imgContainer.clone().addClass('loading').prependTo(this.scrollContainer);
     
     function makeImages() {
       this.makeImage({ start: start,          end: end,          scale: scale, cls: cls, left: 0           });
       this.makeImage({ start: start - length, end: start - 1,    scale: scale, cls: cls, left: -this.width });
       this.makeImage({ start: end + 1,        end: end + length, scale: scale, cls: cls, left: this.width  });
+      loading.remove();
     }
     
     // FIXME: on zoom out, making more than 1 request
