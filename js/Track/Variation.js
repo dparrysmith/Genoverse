@@ -68,9 +68,9 @@ Genoverse.Track.Variation = Genoverse.Track.extend({
       
       if (feature.decorations[i].style === 'insertion') {
         context.beginPath();
-        context.moveTo(position.X - 3, position.Y + this.featureHeight + 1);
-        context.lineTo(position.X,     position.Y + this.featureHeight - 3);
-        context.lineTo(position.X + 3, position.Y + this.featureHeight + 1);
+        context.moveTo(position.X - 3, position.Y + this.featureHeight);
+        context.lineTo(position.X,     position.Y + this.featureHeight - 4);
+        context.lineTo(position.X + 3, position.Y + this.featureHeight);
         context.fill();
       } else if (showLabels && feature.decorations[i].style === 'label') {
         // Normal labels are overlaid, so textAlign = center and textBaseline = middle. Adjust position here, rather than setting and then resetting textAlign and textBaseline for each feature.
