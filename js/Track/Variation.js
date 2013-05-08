@@ -32,6 +32,11 @@ Genoverse.Track.Variation = Genoverse.Track.extend({
     return this.renderer;
   },
   
+  setScale: function () {
+    this.dataBuffer.start = this.maxLabelRegion > this.browser.length ? this.browser.labelBuffer : 0;
+    this.base();
+  },
+  
   positionFeature: function (feature, params) {
     var scale = params.scale;
     var width = feature.position[scale].width;

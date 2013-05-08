@@ -591,7 +591,7 @@ Genoverse.Track = Base.extend({
     if (this.threshold && this.threshold < length || this.checkDataRange(start, end)) {
       makeImages.call(this);
     } else {
-      this.getData(start - length, end + length).done(makeImages);
+      this.getData(start - this.dataBuffer.start - length, end + this.dataBuffer.end + length).done(makeImages);
     }
   },
   
