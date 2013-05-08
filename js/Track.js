@@ -34,7 +34,9 @@ Genoverse.Track = Base.extend({
       }
     }
     
-    this.featureHeight = typeof this.featureHeight !== 'undefined' ? this.featureHeight : this.height; // Feature height must be based on default height, not config.height, which could be anything
+    this.featureHeight     = typeof this.featureHeight !== 'undefined' ? this.featureHeight : this.height; // Feature height must be based on default height, not config.height, which could be anything
+    this.defaultHeight     = this.height;
+    this.defaultAutoHeight = this.autoHeight;
     
     this.extend($.extend(true, {}, deepCopy));
     this.extend(config); // Use Base.extend to make any function in config have this.base
@@ -305,7 +307,7 @@ Genoverse.Track = Base.extend({
     this.label.height(height)[height ? 'show' : 'hide']();
     this.toggleExpander();
   },
-
+  
   toggleExpander: function () {
     if (!this.resizable) {
       return;

@@ -56,7 +56,7 @@ Genoverse.Track.Stranded = {
       var track = this.forwardTrack || this.reverseTrack;
       
       track.removing = true;
-      this.browser.removeTracks([ track ]);
+      this.browser.removeTrack(track);
     }
     
     this.base();

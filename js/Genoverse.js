@@ -125,7 +125,6 @@ var Genoverse = Base.extend({
     var browser = this;
     
     this.menus          = $();
-    this.menuContainer  = $('<div class="menu_container">').css({ width: width - 1, left: 1 }).appendTo(this.container); // FIXME: not needed if not scrolling menus
     this.labelContainer = $('<ul class="label_container">').appendTo(this.container).sortable({
       items       : 'li:not(.unsortable)',
       handle      : '.handle',
@@ -194,7 +193,7 @@ var Genoverse = Base.extend({
       dblclick: function (e) {
         browser.mousewheelZoom(e, 1);
       }
-    }, '.image_container, .overlay, .selector, .track_message');
+    }, '.image_container, .overlay, .selector');
     
     this.selectorControls.on('click', function (e) {
       var pos = browser.getSelectorPosition();
@@ -237,7 +236,6 @@ var Genoverse = Base.extend({
     this.wrapperLeft = this.labelWidth - width;
     this.width      -= this.labelWidth;
     
-    this.menuContainer.width(width - this.labelWidth - 1);
     this.container.width(width);
     
     while (i--) {
@@ -292,7 +290,7 @@ var Genoverse = Base.extend({
     this.dragging  = false;
     this.scrolling = false;
     
-    $('.overlay', this.wrapper).add('.gv_menu', this.menuContainer).add(this.selector).css({
+    $('.overlay', this.wrapper).add(this.selector).css({
       left       : function (i, left) { return (this.className.indexOf('selector') === -1 ? 0 : 1) + parseFloat(left, 10) + parseFloat($(this).css('marginLeft'), 10); },
       marginLeft : function ()        { return  this.className.indexOf('selector') === -1 ? 0 : -1; }
     });
@@ -397,7 +395,7 @@ var Genoverse = Base.extend({
   keydown: function (e) {
     if (e.which === 16 && !this.prev.dragAction && this.dragAction === 'scroll') { // shift key
       this.toggleSelect(true);
-    } else if (e.which === 27) {
+    } else if (e.which === 27) { // escape key
       this.cancelSelect();
       this.closeMenus();
     }
@@ -529,7 +527,7 @@ var Genoverse = Base.extend({
         var i = this.tracks.length;
         
         this.cancelSelect();
-        this.menuContainer.children().hide();
+        this.closeMenus();
         
         while (i--) {
           this.tracks[i].setScale();
@@ -557,12 +555,12 @@ var Genoverse = Base.extend({
       track = this.tracks[i];
       
       if (track.resizable) {
-        track.autoHeight = !!([ (track.config || {}).autoHeight, track.defaults.autoHeight, this.autoHeight ].sort(function (a, b) {
+        track.autoHeight = !!([ track.defaultAutoHeight, this.autoHeight ].sort(function (a, b) {
           return (typeof a !== 'undefined' && a !== null ? 0 : 1) - (typeof b !== 'undefined' && b !== null ?  0 : 1);
         })[0]);
         
         track.heightToggler[track.autoHeight ? 'addClass' : 'removeClass']('auto_height');
-        track.resize(track.height + track.spacing);
+        track.resize(track.defaultHeight + track.spacing);
         track.initialHeight = track.height;
       }
     }
@@ -647,20 +645,29 @@ var Genoverse = Base.extend({
   },
   
   removeTrack: function (track) {
-    // splice tracks array
-    for (var i = 0; i < this.tracks.length; i++) {
-      if (track == this.tracks[i]) {
-        this.tracks.splice(i, 1);
-        break;
+    this.removeTracks([ track ]);
+  },
+  
+  removeTracks: function (tracks) {
+    var i = tracks.length;
+    var j;
+    
+    while (i--) {
+      j = this.tracks.length;
+      
+      while (j--) {
+        if (tracks[i] === this.tracks[j]) {
+          this.tracks.splice(j, 1);
+          break;
+        }
       }
+      
+      if (tracks[i].id) {
+        delete this.tracksById[tracks[i].id];
+      }
+      
+      tracks[i].remove(); // Destroy DOM elements and track itself
     }
-    
-    if (track.id) {
-      delete this.tracksById[track.id];
-    }
-    
-    // Destroy DOM elements and track itself
-    track.remove();
   },
   
   sortTracks: function () {
@@ -708,9 +715,7 @@ var Genoverse = Base.extend({
       }
     }
     
-    var delta = Math.round((this.start - this.prev.start) * this.scale);
-    
-    $('.gv_menu', this.menuContainer).css('left', function (i, left) { return parseFloat(left, 10) - delta; });
+    this.closeMenus();
   },
   
   getURLCoords: function () {
@@ -803,7 +808,7 @@ var Genoverse = Base.extend({
       feature.menuEl = menu;
     }
     
-    return feature.menuEl.appendTo(this.menuContainer).position({ of: event, my: 'left top', collision: 'flipfit' });
+    return feature.menuEl.appendTo('body').position({ of: event, my: 'left top', collision: 'flipfit' });
   },
   
   closeMenus: function () {
