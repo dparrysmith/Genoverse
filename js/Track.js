@@ -15,7 +15,7 @@ Genoverse.Track = Base.extend({
   xhrFields      : {},
   dataType       : 'json',
   dataBuffer     : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
-  scrollBuffer   : 1,//1.2,              // number of widths, if left of right closer to the edges of viewpoint than the buffer, start making more images
+  scrollBuffer   : 1.2,                  // number of widths, if left or right closer to the edges of viewpoint than the buffer, start making more images
   inherit        : [],
   messages       : {
     error     : 'ERROR: ',
@@ -123,7 +123,8 @@ Genoverse.Track = Base.extend({
   },
   
   resetImages: function () {
-    this.imgRange = {};
+    this.imgRange    = {};
+    this.scrollRange = {};
     this.scrollContainer.children('.image_container').remove();
   },
   
@@ -401,7 +402,7 @@ Genoverse.Track = Base.extend({
     
     $.each(this.scaleSettings[this.scale], function (k, v) { track[k] = v; });
     
-    this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
+    this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: this.width * -2, right: this.width * 2 };
     this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
     this.messageContainer.children('.messages').empty().end().hide();
