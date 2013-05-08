@@ -289,6 +289,7 @@ var Genoverse = Base.extend({
   stopDragScroll: function (e, update) {
     this.dragging  = false;
     this.scrolling = false;
+    this.moving    = false;
     
     if (update !== false) {
       if (this.start !== this.dragStart) {
@@ -489,6 +490,14 @@ var Genoverse = Base.extend({
     }
     
     this.setRange(start, end);
+  },
+  
+  moveStart: function () {
+    if (!this.moving) {
+      this.closeMenus();
+      this.selector.hide();
+      this.moving = true;
+    }
   },
   
   setRange: function (start, end, update, force) {
