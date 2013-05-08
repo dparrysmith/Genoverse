@@ -193,7 +193,7 @@ var Genoverse = Base.extend({
       dblclick: function (e) {
         browser.mousewheelZoom(e, 1);
       }
-    }, '.image_container, .overlay, .selector');
+    }, '.image_container, .selector');
     
     this.selectorControls.on('click', function (e) {
       var pos = browser.getSelectorPosition();
@@ -289,11 +289,6 @@ var Genoverse = Base.extend({
   stopDragScroll: function (e, update) {
     this.dragging  = false;
     this.scrolling = false;
-    
-    $('.overlay', this.wrapper).add(this.selector).css({
-      left       : function (i, left) { return (this.className.indexOf('selector') === -1 ? 0 : 1) + parseFloat(left, 10) + parseFloat($(this).css('marginLeft'), 10); },
-      marginLeft : function ()        { return  this.className.indexOf('selector') === -1 ? 0 : -1; }
-    });
     
     if (update !== false) {
       if (this.start !== this.dragStart) {
@@ -459,6 +454,10 @@ var Genoverse = Base.extend({
     
     if (this.menus.length) {
       this.closeMenus();
+    }
+    
+    if (this.selector.css('display') !== 'none') {
+      this.selector.hide();
     }
     
     if (scale > 1) {
