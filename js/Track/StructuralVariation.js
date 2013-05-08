@@ -7,13 +7,23 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
     this.base();
   },
   
-  scaleFeatures: function (features, scale) {
-    if (scale < 1) {
-      var threshold = 1 / scale;
-          features  = $.grep(features, function (f) { return f.end - f.start > threshold || f.breakpoint; }).sort(function (a, b) { return a.start - b.start; });
+  positionFeature: function (feature, params) {
+    var scale = params.scale;
+    var width = feature.position[scale].width;
+  
+    if (!feature.adjusted) {
+      for (var i = 0; i < feature.decorations.length; i++) {
+        if (feature.decorations[i].style.match(/^bound_triangle_(\w+)$/)) {
+          feature.position[scale].width += this.decorationHeight / 2;
+        }
+      }
+      
+      feature.adjusted = true;
     }
     
-    return this.base(features, scale);
+    this.base(feature, params);
+    
+    feature.position[scale].width = width;
   },
   
   bumpFeature: function (bounds, feature, scale, tree) {
@@ -35,7 +45,9 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
     var h           = this.decorationHeight;
     var mid         = h / 2;
     var breakpointH = h * 2;
-    var startOffset = feature.position[scale].start - feature.position[scale].X;
+    var position    = feature.position[scale];
+    var startOffset = position.start - position.X;
+    var spacing     = feature.spacing || this.featureSpacing;
     var decoration, x, x2, y, triangle, dir;
     
     while (i--) {
@@ -47,9 +59,9 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
       
       if (triangle) {
         dir = !!decoration.out === (triangle[1] === 'left');
-        x   = (dir ? feature.position[scale].X + feature.position[scale].W - Math.max(scale, 1) : feature.position[scale].X) + (dir ? 1 : -1) * (decoration.out ? mid : 0);
+        x   = Math.floor((dir ? position.X + position.width + spacing - Math.max(scale, 1) : position.X) + (dir ? 1 : -1) * (decoration.out ? mid : 0)) + 0.5;
         x2  = x + ((triangle[1] === 'left' ? -1 : 1) * mid);
-        y   = feature.position[scale].Y + 0.5;
+        y   = position.Y + 0.5;
         
         if (Math.max(x, x2) > 0 && Math.min(x, x2) < this.width) {
           context.beginPath();
@@ -64,7 +76,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
         this.featurePositions.insert({ x: x + startOffset, y: y, w: mid, h: h }, feature); // make the whole thing clickable for a menu
       } else if (decoration.style === 'somatic_breakpoint') {
         x = decoration.start * scale - startOffset;
-        y = feature.position[scale].Y + 0.5;
+        y = position.Y + 0.5;
         
         if (x > -5.5 && x + 3.5 < this.width) {
           context.beginPath();
@@ -80,7 +92,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
           context.stroke();
         }
         
-        feature.position[scale].bottom = y + breakpointH + this.bumpSpacing;
+        position.bottom = y + breakpointH + this.bumpSpacing;
         
         this.featurePositions.insert({ x: x + startOffset - 3.5, y: y, w: 9, h: breakpointH }, $.extend({}, feature, { breakpoint: true, sort: -feature.sort })); // make the whole thing clickable for a menu
       } else if (decoration.style === 'rect') {
@@ -91,7 +103,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
           this.truncateForDrawing(decoration, scale);
         }
         
-        context.fillRect(decoration.x, feature.position[scale].Y, decoration.width, this.featureHeight);
+        context.fillRect(decoration.x, position.Y, decoration.width, this.featureHeight);
       }
     }
   },
