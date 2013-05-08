@@ -232,9 +232,14 @@ Genoverse.Track = Base.extend({
   },
   
   showMessage: function (code, additionalText) {
-    if (!this.messageContainer.find('.' + code).length) {
-      this.messageContainer.children('.messages').prepend('<div class="' + code + '">' + (this.messages[code] || this.browser.messages[code]) + (additionalText || '') + '</div>').end().show();
+    var messages = this.messageContainer.children('.messages');
+    
+    if (!messages.children('.' + code).length) {
+      messages.prepend('<div class="' + code + '">' + (this.messages[code] || this.browser.messages[code]) + (additionalText || '') + '</div>');
+      this.messageContainer.show();
     }
+    
+    messages = null;
   },
   
   hideMessage: function (code) {
@@ -399,7 +404,7 @@ Genoverse.Track = Base.extend({
     this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: (this.scrollBuffer + 1) * -this.width, right: (this.scrollBuffer + 1) * this.width };
     this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
-    this.messageContainer.children('.messages').empty();
+    this.messageContainer.children('.messages').empty().end().hide();
     
     if (this.scrollContainer.children().hide().filter('.' + this.scrollStart).show().length) {
       this.checkHeight();
