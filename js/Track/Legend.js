@@ -57,7 +57,9 @@ Genoverse.Track.Legend = Genoverse.Track.extend({
       bounds.h = track.height;
       return track.featurePositions.search(bounds).concat(track.labelPositions.search(bounds));
     }), function () {
-      features[this.legend] = this.color;
+      if (this.legend) {
+        features[this.legend] = this.color;
+      }
     });
     
     // sort legend alphabetically
