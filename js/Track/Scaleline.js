@@ -39,7 +39,7 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
     this.scaleline = [
       { x: x1,                             y: this.height / 2, width: this.width - 25, height: 1, decorations: true },
       { x: (this.width - width1 - 10) / 2, y: 0,               width: width1 + 10,     height: this.height, color: bg, labelColor: this.color, labelWidth: width1, label: text  },
-      { x: x2,                             y: 0,               width: width2 + 10,     height: this.height, color: bg, labelColor: this.color, labelWidth: width2, label: text2 },
+      { x: x2,                             y: 0,               width: width2 + 10,     height: this.height, color: bg, labelColor: this.color, labelWidth: width2, label: text2 }
     ];
     
     return this.base(this.scaleline, params);
