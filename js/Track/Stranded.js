@@ -34,9 +34,10 @@ Genoverse.Track.Stranded = {
     }
   },
   
-  positionFeatures: function (features, params) {
+  findFeatures: function () {
+    var track  = this;
     var strand = this.featureStrand;
-    return this.base($.grep(features, function (feature) { return feature.strand === strand; }), params);
+    return $.grep(this.base.apply(this, arguments), function (feature) { return feature.strand === strand; });
   },
   
   makeForwardImage: function (params) {
