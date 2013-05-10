@@ -185,7 +185,7 @@ var Genoverse = Base.extend({
       },
       mousewheel: function (e, delta, deltaX, deltaY) {
         if (deltaY === 0 && deltaX !== 0) {
-          browser.move(null, -deltaX * 10);
+          browser.move(-deltaX * 10);
         } else if (browser.wheelAction === 'zoom') {
           return browser.mousewheelZoom(e, delta);
         }
@@ -453,12 +453,8 @@ var Genoverse = Base.extend({
     var scale = this.scale;
     var start, end, left;
     
-    if (this.menus.length) {
-      this.closeMenus();
-    }
-    
-    if (this.selector.css('display') !== 'none') {
-      this.selector.hide();
+    if (!this.moving) {
+      this.moveStart();
     }
     
     if (scale > 1) {
@@ -475,7 +471,7 @@ var Genoverse = Base.extend({
       delta = this.maxLeft - this.left;
     }
     
-    start = Math.round(this.start - delta / scale);
+    start = Math.max(Math.round(this.start - delta / scale), 1);
     end   = start + this.length - 1;
     
     if (end > this.chromosomeSize) {
@@ -493,11 +489,9 @@ var Genoverse = Base.extend({
   },
   
   moveStart: function () {
-    if (!this.moving) {
-      this.closeMenus();
-      this.selector.hide();
-      this.moving = true;
-    }
+    this.closeMenus();
+    this.selector.hide();
+    this.moving = true;
   },
   
   setRange: function (start, end, update, force) {
@@ -713,6 +707,7 @@ var Genoverse = Base.extend({
       var length = end - start + 1;
       
       this.setRange(start, end);
+      
       // FIXME: a back action which changes scale or a zoom out will reset tracks, since scrollStart will not be the same as it was before
       if (this.prev.scale === this.scale) {
         for (var i in this.tracks) {
