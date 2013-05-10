@@ -609,6 +609,9 @@ Genoverse.Track = Base.extend({
   },
   
   receiveData: function (data, start, end) {
+    start = Math.max(start, 1);
+    end   = Math.min(end, this.browser.chromosomeSize);
+    
     this.setDataRange(start, end);
     
    // try {
@@ -729,7 +732,7 @@ Genoverse.Track = Base.extend({
       feature.position[scale].H = (feature.position[scale].height + this.bumpSpacing);
       feature.position[scale].W = feature.position[scale].width + (feature.spacing || this.featureSpacing);
       feature.position[scale].Y = (feature.y ? feature.y * (feature.position[scale].H + this.bumpSpacing) : 0);
-    
+      
       if (feature.label) {
         if (typeof feature.label === 'string') {
           feature.label = feature.label.split('\n');
