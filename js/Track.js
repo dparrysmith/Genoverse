@@ -537,8 +537,8 @@ Genoverse.Track = Base.extend({
     var deferred;
     var threshold = this.threshold && this.threshold < this.browser.length;
     var div       = this.imgContainer.clone().addClass((params.cls + ' loading').replace('.', '_')).css({ left: params.left, display: params.cls === this.scrollStart ? 'block' : 'none' });
-    var bgImage   = params.background ? $('<img class="bg" />').addClass(params.background).data(params).prependTo(div) : false;
-    var image     = $('<img class="data" />').hide().data(params).appendTo(div).load(function () {
+    var bgImage   = params.background ? $('<img class="bg">').addClass(params.background).data(params).prependTo(div) : false;
+    var image     = $('<img class="data">').hide().data(params).appendTo(div).load(function () {
       $(this).fadeIn('fast').parent().removeClass('loading');
     });
     
@@ -820,7 +820,7 @@ Genoverse.Track = Base.extend({
   render: function (features, img) {
     var params         = img.data();
         features       = this.positionFeatures(this.scaleFeatures(features, params.scale), params); // positionFeatures alters params.featureHeight, so this must happen before the canvases are created
-    var featureCanvas  = $('<canvas />').attr({ width: params.width, height: params.featureHeight || 1 });
+    var featureCanvas  = $('<canvas>').attr({ width: params.width, height: params.featureHeight || 1 });
     var labelCanvas    = this.labels === 'separate' && params.labelHeight ? featureCanvas.clone().attr('height', params.labelHeight) : featureCanvas;
     var featureContext = featureCanvas[0].getContext('2d');
     var labelContext   = labelCanvas[0].getContext('2d');
@@ -850,7 +850,6 @@ Genoverse.Track = Base.extend({
     var canvas = $('<canvas>').attr({ width: this.width, height: height || 1 })[0];
     this.drawBackground(features, canvas.getContext('2d'), img.data());
     img.attr('src', canvas.toDataURL());
-    $(canvas).remove();
     canvas = img = null;
   },
   

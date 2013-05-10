@@ -8,7 +8,7 @@ Genoverse.Track.Static = {
   init: function () {
     this.base();
     
-    this.image = $('<img />').appendTo(this.imgContainer);
+    this.image = $('<img>').appendTo(this.imgContainer);
     this.container.toggleClass('track_container track_container_static').html(this.imgContainer);
   },
   
