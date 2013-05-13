@@ -57,18 +57,19 @@ Genoverse.Track = Base.extend({
       }
     }
     
-    this.imgRange       = {};
-    this.scrollRange    = {};
-    this.order          = typeof this.order       !== 'undefined' ? this.order       : this.index;
-    this.spacing        = typeof this.spacing     !== 'undefined' ? this.spacing     : this.browser.trackSpacing;
-    this.fixedHeight    = typeof this.fixedHeight !== 'undefined' ? this.fixedHeight : this.featureHeight === this.height && !this.bump;
-    this.autoHeight     = typeof this.autoHeight  !== 'undefined' ? this.autoHeight  : !this.fixedHeight && !config.height ? this.browser.autoHeight : false;
-    this.resizable      = typeof this.resizable   !== 'undefined' ? this.resizable   : !this.fixedHeight;
-    this.height        += this.spacing;
-    this.initialHeight  = this.height;
-    this.minLabelHeight = 0;
-    this.font           = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
-    this.labelUnits     = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
+    this.imgRange         = {};
+    this.scrollRange      = {};
+    this.order            = typeof this.order            !== 'undefined' ? this.order            : this.index;
+    this.spacing          = typeof this.spacing          !== 'undefined' ? this.spacing          : this.browser.trackSpacing;
+    this.fixedHeight      = typeof this.fixedHeight      !== 'undefined' ? this.fixedHeight      : this.featureHeight === this.height && !this.bump;
+    this.autoHeight       = typeof this.autoHeight       !== 'undefined' ? this.autoHeight       : !this.fixedHeight && !config.height ? this.browser.autoHeight : false;
+    this.resizable        = typeof this.resizable        !== 'undefined' ? this.resizable        : !this.fixedHeight;
+    this.collapseMessages = typeof this.collapseMessages !== 'undefined' ? this.collapseMessages : this.browser.collapseMessages;
+    this.height          += this.spacing;
+    this.initialHeight    = this.height;
+    this.minLabelHeight   = 0;
+    this.font             = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
+    this.labelUnits       = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
     
     if (this.hidden) {
       this.height = 0;
@@ -176,14 +177,20 @@ Genoverse.Track = Base.extend({
   addDomElements: function () {
     var track = this;
     
+    this.menus            = $();
     this.container        = $('<div class="track_container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
     this.imgContainer     = $('<div class="image_container">').width(this.width);
     this.border           = $('<div class="track_border">').appendTo(this.container);
-    this.messageContainer = $('<div class="message_container"><div class="messages"></div><span class="control">&laquo;</span></div>').appendTo(this.container);
     this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.height).data('track', this);
     this.context          = $('<canvas>')[0].getContext('2d');
-    this.menus            = $();
+    this.messageContainer = $(
+      '<div class="message_container">'                 +
+      '  <div class="messages"></div>'                  +
+      '  <span class="control collapse">&laquo;</span>' +
+      '  <span class="control expand">&raquo;</span>'   +
+      '</div>'
+    ).addClass(this.collapseMessages ? 'collapsed' : 'expanded').appendTo(this.container);
     
     if (this.unsortable) {
       this.label.addClass('unsortable');
@@ -235,8 +242,10 @@ Genoverse.Track = Base.extend({
       track.click(e);
     });
     
-    this.messageContainer.children('.control').on('click', function () {
-      $(this).html($(this).parent().toggleClass('collapsed').hasClass('collapsed') ? '&raquo;' : '&laquo;');
+    this.messageContainer.on('click', '> *', function () {
+      var cls = track.messageContainer.children('.messages').is(':visible') ? 'collapsed' : 'expanded';
+      track.messageContainer.attr('class', 'message_container ' + cls);
+      browser.saveConfig('collapseMessages', cls === 'collapsed' ? 1 : 0, track);
     });
   },
   
