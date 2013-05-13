@@ -19,7 +19,6 @@ Genoverse.Track.Static = {
   setWidth: function (width) {
     this.base(width);
     this.image.width = width;
-    this.imgContainer.width(width);
   },
   
   setScale: function () {

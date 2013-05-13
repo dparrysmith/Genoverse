@@ -373,6 +373,7 @@ Genoverse.Track = Base.extend({
   
   setWidth: function (width) {
     this.width = width;
+    this.imgContainer.width(width);
   },
   
   setScale: function () {
