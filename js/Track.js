@@ -228,7 +228,7 @@ Genoverse.Track = Base.extend({
     var browser = this.browser;
     
     this.container.on('mouseup', '.image_container', function (e) {
-      if ((e.which && e.which !== 1) || (browser.prev.left !== browser.left) || (browser.dragAction === 'select' && browser.selector.outerWidth(true) > 2)) {
+      if ((e.which && e.which !== 1) || browser.moving || (browser.dragAction === 'select' && browser.selector.outerWidth(true) > 2)) {
         return; // Only show menus on left click when not dragging and not selecting
       }
 
