@@ -4,8 +4,6 @@ body.dragging *                                          { cursor: n-resize!impo
 .canvas_container .gv_wrapper                            { position: relative; border-left: 1px solid #999; overflow: hidden; background: #FFF; }
 .canvas_container .gv_wrapper,                
 .canvas_container .label_container                       { -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-.canvas_container .gv_wrapper .overlay                   { position: absolute; height: 100%; z-index: 10; background: url(/i/loading_bg.png) repeat #CCC; }
-.canvas_container .gv_wrapper .overlay.track             { background-position: center; background-repeat: repeat-x; }
 .canvas_container canvas                                 { display: none; }
 .canvas_container .track_container,            
 .canvas_container .track_container_static                { position: relative; overflow: visible; }
@@ -41,7 +39,7 @@ body.dragging *                                          { cursor: n-resize!impo
 .canvas_container .resizer .handle                       { height: 1px; width: 4%; margin: 1px 48%; border: 1px solid #5A5A5A; border-width: 1px 0; background-color: #FFF; }
 .canvas_container .resizer.shadow .handle                { position: relative; left: 5px }
 .canvas_container .resizer:hover,
-.canvas_container .resizer.ui-draggable-dragging         { box-shadow: 0 -5px 7px -3px #000000 inset!important; }
+.canvas_container .resizer.ui-draggable-dragging         { box-shadow: 0 -5px 7px -3px #000 inset!important; }
 .canvas_container .selector                              { position: absolute; height: 100%; top: 0; display: none; margin-left: -1px; background-color: rgba(229, 121, 5, 0.1); z-index: 10; pointer-events: none; }
 .canvas_container .selector                              { border: 1px dashed red; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; }
 .canvas_container .selector.crosshair                    { border-width: 0 0 0 1px; }
@@ -49,15 +47,17 @@ body.dragging *                                          { cursor: n-resize!impo
 .canvas_container .selector_controls                     { display: none!important; }
 
 .canvas_container .message_container                     { 
-  position: absolute; top: 0; left: -1px; display: none; background: #DDDDDD; color: #000000; border: 1px solid #999999; padding: 5px; margin-bottom: 4px; z-index: 11;
+  position: absolute; top: 0; left: -1px; display: none; background: #DDD; color: #000; border: 1px solid #999; padding: 5px; margin-bottom: 4px; z-index: 11;
   font-family: Verdana; font-size: 10px; font-weight: bold;
 }
 .canvas_container .message_container .messages           { float: left; padding-right: 15px; }
 .canvas_container .message_container .control            { position: absolute; top: 50%; right: 5px; height: 14px; margin-top: -7px; font-size: 11px; cursor: pointer; }
+.canvas_container .message_container .control.expand     { position: relative; right: 0; top: 0; margin: 0; }
 .canvas_container .message_container .control:hover      { text-decoration: underline; }
 .canvas_container .message_container.collapsed           { padding: 1px 3px; }
-.canvas_container .message_container.collapsed .messages { display: none; }
-.canvas_container .message_container.collapsed .control  { position: relative; right: 0; top: 0; margin: 0; }
+.canvas_container .message_container.collapsed .messages,
+.canvas_container .message_container.collapsed .collapse,
+.canvas_container .message_container.expanded  .expand   { display: none; }
 
 body.mac .canvas_container .label_container li .handle   { cursor: ns-resize; }
 
@@ -65,7 +65,7 @@ body.mac .canvas_container .label_container li .handle   { cursor: ns-resize; }
 
 .canvas .genoverse_controls                              { display: none; float: right; padding-right: 6px; }
 .canvas .genoverse_controls div                          {
-  position: relative; top: -2px; height: 18px; width: 26px; display: inline-block; vertical-align: top; border: 1px solid #333333; border-radius: 6px;
+  position: relative; top: -2px; height: 18px; width: 26px; display: inline-block; vertical-align: top; border: 1px solid #333; border-radius: 6px;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #EAEEFF), color-stop(1, #515F7C));
   background: -moz-linear-gradient(center top, #EAEEFF 5%, #515F7C 100%);
   background-color: #EAEEFF;
@@ -77,7 +77,7 @@ body.mac .canvas_container .label_container li .handle   { cursor: ns-resize; }
 }
 .canvas .genoverse_controls div.left                     { border-radius: 5px 0 0 5px; border-right: none; }
 .canvas .genoverse_controls div.right                    { border-radius: 0 5px 5px 0; }
-.canvas .genoverse_controls button                       { position: absolute; top: 0; left: 50%; height: 100%; width: 16px; margin-left: -8px; border: 0; background: url(/i/controls.png); cursor: pointer; outline: 0; }
+.canvas .genoverse_controls button                       { position: absolute; top: 0; left: 50%; height: 17px; width: 16px; margin-left: -8px; border: 0; background: url(/i/controls.png); cursor: pointer; outline: 0; }
 .canvas .genoverse_controls button.scroll_left           { background-position:   0px   1px; }
 .canvas .genoverse_controls button.scroll_right          { background-position:   0px -17px; }
 .canvas .genoverse_controls button.zoom_in               { background-position: -17px   1px; }
@@ -88,7 +88,7 @@ body.mac .canvas_container .label_container li .handle   { cursor: ns-resize; }
 .canvas .genoverse_controls button.dragging              { background-position: -68px   1px; }
 .canvas .genoverse_controls button.dragging.off          { background-position: -68px -17px; }
 .canvas .genoverse_controls button.wheel_zoom            { background-position: -85px   1px; }
-.canvas .genoverse_controls button.wheel_zoom.off        { background-position: -85px -17px; }
+.canvas .genoverse_controls button.wheel_zoom.off        { background-position: -85px -16px; }
 
 .canvas .genoverse_controls .label                       { margin-left: 20px; padding-right: 6px; font-size: 15px; color: #FFF; }
 
