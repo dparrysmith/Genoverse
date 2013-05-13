@@ -69,7 +69,6 @@ Genoverse.Track = Base.extend({
     this.minLabelHeight = 0;
     this.font           = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
     this.labelUnits     = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
-    this.scrollStart    = 'ss_' + this.browser.start + '_' + this.browser.end;
     
     if (this.hidden) {
       this.height = 0;
@@ -125,7 +124,26 @@ Genoverse.Track = Base.extend({
   resetImages: function () {
     this.imgRange    = {};
     this.scrollRange = {};
-    this.scrollContainer.children('.image_container').remove();
+    this.scrollContainer.empty();
+    this.resetImageRanges();
+  },
+  
+  resetImageRanges: function () {
+    this.left        = 0;
+    this.scrollStart = 'ss_' + this.browser.start + '_' + this.browser.end;
+    
+    this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: this.width * -2, right: this.width * 2 };
+    this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
+  },
+  
+  resetFeaturePositions: function () {
+    this.scaleSettings    = {};
+    this.featurePositions = new RTree();
+    this.labelPositions   = this.labels === 'separate' ? new RTree() : this.featurePositions;
+    
+    for (var id in this.featuresById) {
+      delete this.featuresById[id].position;
+    }
   },
   
   rename: function (name) {
@@ -306,7 +324,7 @@ Genoverse.Track = Base.extend({
     this.height = height;
     
     if (typeof arguments[1] === 'number') {
-      $(this.imgContainers).children('.labels').css('top', arguments[1]);
+      this.imgContainers.children('.labels').css('top', arguments[1]);
     }
     
     this.container.height(height);
@@ -361,9 +379,9 @@ Genoverse.Track = Base.extend({
     var track = this;
     var featurePositions, labelPositions;
     
-    this.left        = 0;
-    this.scale       = this.browser.scale;
-    this.scrollStart = 'ss_' + this.browser.start + '_' + this.browser.end;
+    this.scale = this.browser.scale;
+    
+    this.resetImageRanges();
     
     if (this.renderer) {
       var renderer = this.getRenderer();
@@ -401,9 +419,6 @@ Genoverse.Track = Base.extend({
     }
     
     $.each(this.scaleSettings[this.scale], function (k, v) { track[k] = v; });
-    
-    this.imgRange[this.scrollStart]    = this.imgRange[this.scrollStart]    || { left: this.width * -2, right: this.width * 2 };
-    this.scrollRange[this.scrollStart] = this.scrollRange[this.scrollStart] || { start: this.browser.start - this.browser.length, end: this.browser.end + this.browser.length };
     
     this.messageContainer.children('.messages').empty().end().hide();
     
@@ -480,16 +495,6 @@ Genoverse.Track = Base.extend({
     return this.features.search({ x: start - this.dataBuffer.start, y: 0, w: end - start + this.dataBuffer.start + this.dataBuffer.end + 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; });
   },
   
-  resetFeaturePositions: function () {
-    this.scaleSettings    = {};
-    this.featurePositions = new RTree();
-    this.labelPositions   = this.labels === 'separate' ? new RTree() : this.featurePositions;
-    
-    for (var id in this.featuresById) {
-      delete this.featuresById[id].position;
-    }
-  },
-  
   move: function (delta) {
     this.left += delta;
     this.scrollContainer.css('left', this.left);
@@ -525,6 +530,23 @@ Genoverse.Track = Base.extend({
       this.imgRange[scrollStart].right  += this.width;
       this.scrollRange[scrollStart].end += this.browser.length;
     }
+  },
+  
+  moveTo: function (start, end, delta) {
+    var scrollRange = this.scrollRange[this.scrollStart];
+    var scrollStart = 'ss_' + start + '_' + end;
+    
+    if (this.scrollRange[scrollStart] || start > scrollRange.end || end < scrollRange.start) {
+      this.resetImageRanges();
+      
+      if (!this.scrollContainer.css('left', 0).children().hide().filter('.' + scrollStart).show().length) {
+        return this.makeFirstImage();
+      }
+    } else {
+      this.move(typeof delta === 'number' ? delta : (start - this.browser.start) * this.scale);
+    }
+    
+    this.checkHeight();
   },
   
   makeImage: function (params) {

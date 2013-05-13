@@ -200,7 +200,7 @@ var Genoverse = Base.extend({
       
       switch (e.target.className) {
         case 'zoomHere' : browser.setRange(pos.start, pos.end, true); break;
-        case 'center'   : browser.startDragScroll(); browser.move(browser.width / 2 - (pos.left + pos.width / 2)); browser.stopDragScroll; break;
+        case 'center'   : browser.move(browser.width / 2 - (pos.left + pos.width / 2)); break;
         case 'summary'  : browser.summary(pos.start, pos.end); break;
         case 'cancel'   : browser.cancelSelect(); break;
         default         : break;
@@ -281,7 +281,6 @@ var Genoverse = Base.extend({
   startDragScroll: function (e) {
     this.dragging   = 'scroll';
     this.scrolling  = !e;
-    this.prev.left  = this.left;
     this.dragOffset = e ? e.pageX - this.left : 0;
     this.dragStart  = this.start;
   },
@@ -520,7 +519,6 @@ var Genoverse = Base.extend({
     
     if (force || this.prev.scale !== this.scale) {
       this.left        = 0;
-      this.prev.left   = 0;
       this.minLeft     = Math.round((this.end   - this.chromosomeSize) * this.scale);
       this.maxLeft     = Math.round((this.start - 1) * this.scale);
       this.labelBuffer = Math.ceil(this.textWidth / this.scale) * this.longestLabel;
@@ -702,19 +700,20 @@ var Genoverse = Base.extend({
     var coords = this.getURLCoords();
     var start  = parseInt(coords.start, 10);
     var end    = parseInt(coords.end,   10);
+    var length, delta, i;
     
     if (coords.start && !(start === this.start && end === this.end)) {
-      var length = end - start + 1;
+      length = end - start + 1;
       
       this.setRange(start, end);
       
       // FIXME: a back action which changes scale or a zoom out will reset tracks, since scrollStart will not be the same as it was before
       if (this.prev.scale === this.scale) {
-        for (var i in this.tracks) {
-          this.tracks[i].move(Math.round((this.prev.start - this.start) * this.scale));
-        }
+        delta = (this.prev.start - this.start) * this.scale;
         
-        this.checkTrackHeights();
+        for (i = 0; i < this.tracks.length; i++) {
+          this.tracks[i].moveTo(this.start, this.end, delta);
+        }
       }
     }
     
