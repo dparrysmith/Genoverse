@@ -14,6 +14,7 @@ var Genoverse = Base.extend({
   dragAction       : 'scroll', // options are: scroll, select, off
   wheelAction      : 'off',    // options are: zoom, off
   genome           : undefined,
+  collapseMessages : false,
   colors           : {
     background     : '#FFFFFF',
     majorGuideLine : '#CCCCCC',
@@ -184,6 +185,10 @@ var Genoverse = Base.extend({
         return false;
       },
       mousewheel: function (e, delta, deltaX, deltaY) {
+        if (browser.noWheelZoom) {
+          return true;
+        }
+        
         if (deltaY === 0 && deltaX !== 0) {
           browser.move(-deltaX * 10);
         } else if (browser.wheelAction === 'zoom') {
@@ -208,10 +213,20 @@ var Genoverse = Base.extend({
     });
     
     $(document).on({
-      'mouseup.genoverse'   : $.proxy(this.mouseup,   this),
-      'mousemove.genoverse' : $.proxy(this.mousemove, this),
-      'keydown.genoverse'   : $.proxy(this.keydown,   this),
-      'keyup.genoverse'     : $.proxy(this.keyup,     this)
+      'mouseup.genoverse'    : $.proxy(this.mouseup,   this),
+      'mousemove.genoverse'  : $.proxy(this.mousemove, this),
+      'keydown.genoverse'    : $.proxy(this.keydown,   this),
+      'keyup.genoverse'      : $.proxy(this.keyup,     this),
+      'mousewheel.genoverse' : function (e) {
+        if (browser.wheelAction === 'zoom') {
+          if (browser.wheelTimeout) {
+            clearTimeout(browser.wheelTimeout);
+          }
+          
+          browser.noWheelZoom  = browser.noWheelZoom || e.target !== browser.container[0];
+          browser.wheelTimeout = setTimeout(function () { browser.noWheelZoom = false; }, 300);
+        }
+      }
     });
     
     $(window).on(this.useHash ? 'hashchange.genoverse' : 'popstate.genoverse', $.proxy(this.popState, this));
@@ -836,6 +851,8 @@ var Genoverse = Base.extend({
       'End: '   + end   + "\n"
     );
   },
+  
+  saveConfig: $.noop,
   
   /**
    * functionWrap - wraps event handlers and adds debugging functionality
