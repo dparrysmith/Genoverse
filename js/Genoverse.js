@@ -133,13 +133,10 @@ var Genoverse = Base.extend({
       axis        : 'y',
       helper      : 'clone',
       cursor      : 'move',
+      update      : $.proxy(this.updateTrackOrder, this),
       start       : function (e, ui) {
         ui.placeholder.css({ height: ui.item.height(), visibility: 'visible', background: browser.colors.sortHandle }).html(ui.item.html());
         ui.helper.hide();
-      },
-      update      : function (e, ui) {
-        ui.item.data('track').container[ui.item[0].previousSibling ? 'insertAfter' : 'insertBefore']($(ui.item[0].previousSibling || ui.item[0].nextSibling).data('track').container);
-        browser.tracks = browser.labelContainer.children('li').map(function () { return $(this).data('track'); }); // Correct the order
       }
     });
     
@@ -691,14 +688,45 @@ var Genoverse = Base.extend({
     var containers = $();
     
     for (var i = 0; i < sorted.length; i++) {
+      if (sorted[i].menus.length) {
+        sorted[i].top = sorted[i].container.position().top;
+      }
+      
       labels.push(sorted[i].label[0]);
-      containers.push(sorted[i].container.detach()[0]);
+      containers.push(sorted[i].container[0]);
     }
     
     this.labelContainer.append(labels);
     this.wrapper.append(containers);
     
+    // Correct the order
+    this.tracks = labels.map(function () { return $(this).data('track'); }).each(function () {
+      if (this.menus.length) {
+        var diff = this.container.position().top - this.top;
+        this.menus.css('top', function (i, top) { return parseInt(top, 10) + diff; });
+        delete this.top;
+      }
+    }); 
+    
     sorted = labels = containers = null;
+  },
+  
+  updateTrackOrder: function (e, ui) {
+    var track = ui.item.data('track');
+    
+    var p = ui.item.prev().data('track').order || 0;
+    var n = ui.item.next().data('track').order || 0;
+    var o = p || n;
+    
+    if (Math.floor(n) === Math.floor(p)) {
+      order = p + (n - p) / 2;
+    } else {
+      order = o + (p ? 1 : -1) * (Math.round(o) - o || 1) / 2;
+    }
+    
+    track.order = order;
+    
+    this.sortTracks();
   },
   
   updateURL: function () {
@@ -793,12 +821,6 @@ var Genoverse = Base.extend({
       var offset  = wrapper.offset();
       var menu    = this.menuTemplate.clone(true);
       
-      this.menus.push(menu[0]);
-      
-      if (track) {
-        track.menus.push(menu[0]);
-      }
-      
       $.when(track ? track.populateMenu(feature) : feature).done(function (feature) {
         if (Object.prototype.toString.call(feature) !== '[object Array]') {
           feature = [ feature ];
@@ -825,11 +847,17 @@ var Genoverse = Base.extend({
       feature.menuEl = menu;
     }
     
+    this.menus = this.menus.add(feature.menuEl);
+    
+    if (track) {
+      track.menus = track.menus.add(feature.menuEl);
+    }
+    
     return feature.menuEl.appendTo('body').position({ of: event, my: 'left top', collision: 'flipfit' });
   },
   
   closeMenus: function () {
-    this.menus.children('.close').trigger('click');
+    this.menus.filter(':visible').children('.close').trigger('click');
     this.menus = $();
   },
   

@@ -116,6 +116,7 @@ Genoverse.Track = Base.extend({
   
   reset: function () {
     this.resetImages();
+    this.browser.closeMenus.call(this);
     
     if (this.url !== false) {
       this.init();
@@ -369,14 +370,6 @@ Genoverse.Track = Base.extend({
     } else if (this.expander) {
       this.hideMessage('resize');
       this.expander.hide();
-    }
-  },
-  
-  remove: function () {
-    this.container.add(this.label).add(this.menus).remove();
-    
-    for (var key in this) {
-      delete this[key];
     }
   },
   
@@ -1014,6 +1007,12 @@ Genoverse.Track = Base.extend({
     this.resize(0);
   },
   
+  enable: function () {
+    this.show();
+    this.disabled = false;
+    this.makeFirstImage();
+  },
+  
   disable: function () {
     this.hide();
     this.scrollContainer.css('left', 0);
@@ -1021,10 +1020,12 @@ Genoverse.Track = Base.extend({
     this.disabled = true;
   },
   
-  enable: function () {
-    this.show();
-    this.disabled = false;
-    this.makeFirstImage();
+  remove: function () {
+    this.container.add(this.label).add(this.menus).remove();
+    
+    for (var key in this) {
+      delete this[key];
+    }
   },
   
   drawBackground      : $.noop,
