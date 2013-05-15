@@ -3,11 +3,6 @@ Genoverse.Track.Variation = Genoverse.Track.extend({
   labels         : 'overlay',
   featureSpacing : 0,
   
-  init: function () {
-    this.base();
-    this.setRenderer(this.renderer, true);
-  },
-  
   setRenderer: function (renderer, permanent) {
     if (renderer === 'compact') {
       this.depth = 1;

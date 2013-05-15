@@ -2,11 +2,6 @@ Genoverse.Track.Gene = Genoverse.Track.extend({
   height : 50,
   bump   : true,
   
-  init: function () {
-    this.base();
-    this.setRenderer(this.renderer, true);
-  },
-  
   setRenderer: function (renderer, permanent) {
     this.labels = !/nolabel/.test(renderer);
     

@@ -4,9 +4,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
   init: function () {
     this.decorationHeight = this.featureHeight - 1;
     this.breakpoints      = {};
-    
     this.base();
-    this.setRenderer(this.renderer, true);
   },
   
   setRenderer: function (renderer, permanent) {
