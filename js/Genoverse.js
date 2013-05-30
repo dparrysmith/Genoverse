@@ -302,9 +302,6 @@ var Genoverse = Base.extend({
     this.scrolling  = !e;
     this.dragOffset = e ? e.pageX - this.left : 0;
     this.dragStart  = this.start;
-    
-    this.closeMenus();
-    this.selector.hide();
   },
   
   stopDragScroll: function (update) {
@@ -496,6 +493,11 @@ var Genoverse = Base.extend({
     }
     
     this.left = left;
+    
+    if (start !== this.dragStart) {
+      this.closeMenus();
+      this.selector.hide();
+    }
     
     for (var i = 0; i < this.tracks.length; i++) {
       this.tracks[i].move(delta);
