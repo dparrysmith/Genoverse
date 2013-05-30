@@ -14,7 +14,7 @@ Genoverse.Track.on('afterPositionFeatures', function (features, params) {
   var legend = this.legend;
   
   if (legend) {
-    setTimeout(function () { legend.makeImage(params); }, 1)
+    setTimeout(function () { legend.makeImage(params); }, 1);
   }
 });
 

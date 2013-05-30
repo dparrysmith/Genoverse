@@ -20,7 +20,7 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
   },
   
   // Return all features - there won't be many, and this ensures order and height is always correct
-  findFeatures: function (start, end) {
+  findFeatures: function () {
     return this.features.search({ x: 1, y: 0, w: 9e99, h: 1 }).sort(function (a, b) { return a.sort - b.sort; });
   },
   
@@ -48,7 +48,7 @@ Genoverse.Track.Patch = Genoverse.Track.extend({
     return this.base(params);
   },
   
-  renderBackground: function (f, img, height) {
+  renderBackground: function (f, img) {
     var params   = img.data();
     var features = this.positionFeatures($.extend(true, [], this.findFeatures(params.start, params.end)), params);
     var heights  = [ params.height ];

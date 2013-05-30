@@ -84,8 +84,7 @@ var Genoverse = Base.extend({
   },
   
   init: function () {
-    var browser = this;
-    var width   = this.width;
+    var width = this.width;
     
     if (!(this.container && this.container.length)) {
       return this.die('You must supply a ' + (this.container ? 'valid ' : '') + 'container element');
@@ -718,6 +717,7 @@ var Genoverse = Base.extend({
     var p = ui.item.prev().data('track').order || 0;
     var n = ui.item.next().data('track').order || 0;
     var o = p || n;
+    var order;
     
     if (Math.floor(n) === Math.floor(p)) {
       order = p + (n - p) / 2;
@@ -819,9 +819,7 @@ var Genoverse = Base.extend({
   
   makeMenu: function (feature, event, track) {
     if (!feature.menuEl) {
-      var wrapper = this.wrapper;
-      var offset  = wrapper.offset();
-      var menu    = this.menuTemplate.clone(true);
+      var menu = this.menuTemplate.clone(true);
       
       $.when(track ? track.populateMenu(feature) : feature).done(function (feature) {
         if (Object.prototype.toString.call(feature) !== '[object Array]') {

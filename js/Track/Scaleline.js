@@ -45,7 +45,7 @@ Genoverse.Track.Scaleline = Genoverse.Track.extend({
     return this.base(this.scaleline, params);
   },
   
-  decorateFeature: function (feature, context, scale) {
+  decorateFeature: function (feature, context) {
     var x = this.strand === 1 ? this.width - 25 : 25;
     
     context.strokeStyle = this.color;

@@ -80,7 +80,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
       }
     }
     
-   this.base(bounds, feature, scale, tree);
+    this.base(bounds, feature, scale, tree);
   },
   
   drawFeature: function (feature, featureContext, labelContext, scale) {
@@ -145,7 +145,7 @@ Genoverse.Track.StructuralVariation = Genoverse.Track.extend({
         decoration.width = (decoration.end - decoration.start) * scale + Math.max(scale, 1);
         
         if (decoration.x < 0 || decoration.x + decoration.width > this.width) {
-          this.truncateForDrawing(decoration, scale);
+          this.truncateForDrawing(decoration);
         }
         
         context.fillRect(decoration.x, position.Y, decoration.width, this.featureHeight);

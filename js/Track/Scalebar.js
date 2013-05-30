@@ -78,8 +78,9 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   },
   
   setFeatures: function (start, end) {
-    var start = Math.max(start - (start % this.minorUnit) - this.majorUnit, 0);
-    var flip  = (start / this.minorUnit) % 2 ? 1 : -1;
+    start = Math.max(start - (start % this.minorUnit) - this.majorUnit, 0);
+    
+    var flip = (start / this.minorUnit) % 2 ? 1 : -1;
     var feature, major, label;
     
     for (var x = start; x < end + this.minorUnit; x += this.minorUnit) {

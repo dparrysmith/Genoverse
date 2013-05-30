@@ -206,7 +206,7 @@ Genoverse.Track = Base.extend({
         click     : function () {
           var height;
           
-          if (track.autoHeight = !track.autoHeight) {
+          if ((track.autoHeight = !track.autoHeight)) {
             track.heightBeforeToggle = track.height;
             height = track.fullVisibleHeight;
           } else {
@@ -899,7 +899,7 @@ Genoverse.Track = Base.extend({
   
   drawFeature: function (feature, featureContext, labelContext, scale) {
     if (feature.x < 0 || feature.x + feature.width > this.width) {
-      this.truncateForDrawing(feature, scale);
+      this.truncateForDrawing(feature);
     }
     
     if (feature.color !== false) {
@@ -942,7 +942,7 @@ Genoverse.Track = Base.extend({
   },
   
   // truncate features - make the features start at 1px outside the canvas to ensure no lines are drawn at the borders incorrectly
-  truncateForDrawing: function (feature, scale) {
+  truncateForDrawing: function (feature) {
     var start = Math.min(Math.max(feature.x, -1), this.width + 1);
     var width = feature.x - start + feature.width;
 

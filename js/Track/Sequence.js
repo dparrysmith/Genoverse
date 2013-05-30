@@ -11,7 +11,7 @@ Genoverse.Track.Sequence = Genoverse.Track.extend({
     
     this.labelWidth   = {};
     this.widestLabel  = this.lowerCase ? 'g' : 'G';
-    this.labelYOffset = (this.featureHeight + (this.lowerCase ? 0 : 1)) / 2
+    this.labelYOffset = (this.featureHeight + (this.lowerCase ? 0 : 1)) / 2;
     
     if (!this.colors) {
       this.colors           = {};
