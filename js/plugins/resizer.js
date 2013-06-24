@@ -1,4 +1,4 @@
-Genoverse.Track.on('afterInit', function () {
+Genoverse.Track.on('afterSetModelView', function () {
   if (!this.resizable) {
     return;
   }
@@ -19,7 +19,7 @@ Genoverse.Track.on('afterInit', function () {
     }
   })).css({ width: this.width, left: 0 })[this.autoHeight ? 'hide' : 'show']();
   
-  if (!this.autoHeight && this.height - this.spacing === this.featureHeight) {
+  if (!this.autoHeight && this.height - this.margin === this.featureHeight) {
     this.resize(this.height + this.resizer.height());
     this.initialHeight = this.height;
   }
