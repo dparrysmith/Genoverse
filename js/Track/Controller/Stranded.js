@@ -1,47 +1,39 @@
 Genoverse.Track.Controller.Stranded = Genoverse.Track.Controller.extend({
-  constructor: function (config) {
+  constructor: function () {
+    if (this.track.strand) {
+      this.strand = this.track.strand;
+    }
+    
     if (typeof this._makeImage === 'function') {
       return;
     }
     
     if (this.strand === -1) {
-      this.url        = false;
-      this._makeImage = this.makeReverseImage || this.makeImage;
+      this._makeImage = this.track.makeReverseImage ? $.proxy(this.track.makeReverseImage, this) : this.makeImage;
       this.makeImage  = $.noop;
     } else {
-      var reverseTrack = $.extend({}, Object.getPrototypeOf(this), config, { controller: this.controller, model: this.model, view: this.view, strand: -1, forwardTrack: this });
-      
       this.strand       = 1;
       this._makeImage   = this.makeImage;
       this.makeImage    = this.makeForwardImage;
-      this.reverseTrack = this.browser.setTracks([ reverseTrack ], this.browser.tracks.length)[0];
+      this.reverseTrack = this.browser.addTrack(this.track.constructor.extend({ strand: -1, url: false, forwardTrack: this }), this.browser.tracks.length).controller;
     }
     
-    if (!this.featureStrand) {
-      this.featureStrand = this.strand;
+    this.track.strand        = this.track.strand        || this.strand;
+    this.track.featureStrand = this.track.featureStrand || this.strand;
+    
+    if (!(this.model instanceof Genoverse.Track.Model.Stranded)) {
+      this.track.lengthMap.push([ -9e99, { model: Genoverse.Track.Model.Stranded }]);
     }
     
-    this.base(config);
-  },
-  
-  setURL: function (urlParams, update) {
-    $.extend(urlParams || this.urlParams, { strand: this.featureStrand });
-    this.base(urlParams, update);
+    this.base();
   },
   
   init: function () {
     this.base();
     
-    if (this.strand === 1) {
-      this.reverseTrack.features = this.features;
-    } else {
-      this.features = this.forwardTrack.features;
+    if (this.reverseTrack) {
+      this.reverseTrack.model.prop('features', this.model.prop('features'));
     }
-  },
-  
-  findFeatures: function () {
-    var strand = this.featureStrand;
-    return $.grep(this.base.apply(this, arguments), function (feature) { return feature.strand === strand; });
   },
   
   makeForwardImage: function (params) {
@@ -65,5 +57,16 @@ Genoverse.Track.Controller.Stranded = Genoverse.Track.Controller.extend({
     }
     
     this.base();
+  }
+});
+  
+Genoverse.Track.Model.Stranded = Genoverse.Track.Model.extend({
+  setURL: function (urlParams, update) {
+    this.base($.extend(urlParams || this.urlParams, { strand: this.track.featureStrand }), update);
+  },
+  
+  findFeatures: function () {
+    var strand = this.track.featureStrand;
+    return $.grep(this.base.apply(this, arguments), function (feature) { return feature.strand === strand; });
   }
 });

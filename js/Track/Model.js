@@ -1,46 +1,124 @@
+// FIXME: prop function is duplicated in model and view
 Genoverse.Track.Model = Base.extend({
-  dataType  : 'json',
-  threshold : undefined,
-  xhrFields : {},
-  buffer    : 0,
+  dataBuffer : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
+  xhrFields  : {},
+  dataType   : 'json',
+  allData    : false,
+  
+  url        : undefined,
+  urlParams  : undefined, // hash of URL params
+  threshold  : undefined,
   
   constructor : function () {
-    this.features     = this.features     || new RTree();
-    this.featuresById = this.featuresById || {};
-    this.dataRanges   = this.dataRanges   || {};
+    Genoverse.wrapFunctions(this);
     
-    if (this.urlParams) {
+    if (this.url) {
       this._url = this.url; // Remember original url
       this.setURL();
     }
+    
+    this.init();
+  },
+  
+  init: function () {
+    this.dataRanges   = new RTree();
+    this.features     = new RTree();
+    this.featuresById = {};
+    this.dataLoading  = []; // tracks incomplete requests for data
   },
   
   setURL: function (urlParams, update) {
-    urlParams = urlParams || this.urlParams;
+    urlParams = urlParams || this.urlParams || {};
     
     if (update && this._url) {
       this.url = this._url;
     }
 
-    this.url += (this.url.indexOf('?') === -1 ? '?' : '&') + $.map(urlParams, function (value, key) { return key + '=' + value; }).join('&');
+    this.url += (this.url.indexOf('?') === -1 ? '?' : '&') + decodeURIComponent($.param(urlParams, true));
+    this.url  = this.url.replace(/[&?]$/, '');
   },
   
-  getData: function (start, end) {
-    return this.url ? $.ajax({
-      url       : this.parseURL(start, end),
-      dataType  : this.dataType,
-      context   : this,
-      xhrFields : this.xhrFields,
-      success   : function (data) { this.receiveData(data, start, end); },
-      error     : function (xhr, statusText) { this.showError(statusText + ' while getting the data, see console for more details', arguments); }
-    }) : $.Deferred().resolveWith(this);
+  parseURL: function (start, end, url) {
+    if (this.allData) {
+      start = 1;
+      end   = this.browser.chromosomeSize;
+    }
+
+    return (url || this.url).replace(/__CHR__/, this.browser.chr).replace(/__START__/, start).replace(/__END__/, end);
+  },
+  
+  setLabelBuffer: function (buffer) {
+    this.dataBuffer.start = Math.max(this.dataBuffer.start, buffer);
+  },
+  
+  getData: function (start, end, done) {
+    start = Math.max(1, start);
+    end   = Math.min(this.browser.chromosomeSize, end);
+    
+    var model    = this;
+    var deferred = $.Deferred();
+    var bins     = [];
+    var length   = end - start + 1;
+    
+    if (!this.url) {
+      return deferred.resolveWith(this.track.controller);
+    }
+   
+    if (this.dataRequestLimit && length > this.dataRequestLimit) {
+      var i = Math.ceil(length / this.dataRequestLimit);
+     
+      while (i--) {
+        bins.push([ start, i ? start += this.dataRequestLimit - 1 : end ]);
+        start++;
+      }
+    } else {
+      bins.push([ start, end ]);
+    }
+   
+    $.when.apply($, $.map(bins, function (bin) {
+      var request = $.ajax({
+        url       : model.parseURL(bin[0], bin[1]),
+        dataType  : model.dataType,
+        context   : model,
+        xhrFields : model.xhrFields,
+        success   : function (data) { this.receiveData(data, bin[0], bin[1]); },
+        error     : function (xhr, statusText) { this.track.controller.showError(statusText + ' while getting the data, see console for more details', arguments); },
+        complete  : function (xhr) { this.dataLoading = $.grep(this.dataLoading, function (t) { return xhr !== t; }); }
+      });
+      
+      request.coords = [ bin[0], bin[1] ]; // store actual start and end on the request, in case they are needed
+      
+      if (typeof done === 'function') {
+        request.done(done);
+      }
+      
+      model.dataLoading.push(request);
+      
+      return request;
+    })).done(function () { deferred.resolveWith(model.track.controller); });
+     
+    return deferred;
+  },
+  
+  receiveData: function (data, start, end) {
+    start = Math.max(start, 1);
+    end   = Math.min(end, this.browser.chromosomeSize);
+    
+    this.setDataRange(start, end);
+    this.parseData(data, start, end);
+    
+    if (this.allData) {
+      this.url = false;
+    }
   },
   
   /**
-  * parseData(data) - parse raw data from the data source (e.g. online web service)
+  * parseData(data, start, end) - parse raw data from the data source (e.g. online web service)
   * extract features and insert it into the internal features storage (RTree)
   *
-  * >> data - raw data from the data source (e.g. ajax response)
+  * >> data  - raw data from the data source (e.g. ajax response)
+  * >> start - start location of the data
+  * >> end   - end   location of the data
   * << nothing
   *
   * every feature extracted this routine must construct a hash with at least 3 values:
@@ -64,6 +142,41 @@ Genoverse.Track.Model = Base.extend({
     }
   },
   
+  setDataRange: function (start, end) {
+    if (this.allData) {
+      start = 1;
+      end   = this.browser.chromosomeSize;
+    }
+    
+    this.dataRanges.insert({ x: start, w: end - start + 1, y: 0, h: 1 }, [ start, end ]);
+  },
+  
+  checkDataRange: function (start, end) {
+    start = Math.max(1, start);
+    end   = Math.min(this.browser.chromosomeSize, end);
+    
+    var ranges = this.dataRanges.search({ x: start, w: end - start + 1, y: 0, h: 1 }).sort(function (a, b) { return a[0] - b[0]; });
+    
+    if (!ranges.length) {
+      return false;
+    }
+    
+    var s = ranges.length === 1 ? ranges[0][0] : 9e99;
+    var e = ranges.length === 1 ? ranges[0][1] : -9e99;
+    
+    for (var i = 0; i < ranges.length - 1; i++) {
+      // s0 <= s1 && ((e0 >= e1) || (e0 + 1 >= s1))
+      if (ranges[i][0] <= ranges[i + 1][0] && ((ranges[i][1] >= ranges[i + 1][1]) || (ranges[i][1] + 1 >= ranges[i + 1][0]))) {
+        s = Math.min(s, ranges[i][0]);
+        e = Math.max(e, ranges[i + 1][1]);
+      } else {
+        return false;
+      }
+    }
+    
+    return start >= s && end <= e;
+  },
+  
   insertFeature: function (feature) {
     // Make sure we have a unique ID, this method is not efficient, so better supply your own id
     if (!feature.id) {
@@ -78,5 +191,23 @@ Genoverse.Track.Model = Base.extend({
   
   findFeatures: function (start, end) {
     return this.features.search({ x: start - this.dataBuffer.start, y: 0, w: end - start + this.dataBuffer.start + this.dataBuffer.end + 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; });
+  },
+  
+  prop: function (key, value) {
+    if (value) {
+      this[key] = value;
+    }
+    
+    return this[key];
+  },
+  
+  abort: function () {
+    for (var i = 0; i < this.dataLoading.length; i++) {
+      this.dataLoading[i].abort();
+    }
+    
+    this.dataLoading = [];
   }
 });
+
+

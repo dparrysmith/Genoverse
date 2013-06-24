@@ -6,31 +6,34 @@ Genoverse.Track.Scaleline = Genoverse.Track.Static.extend({
   
   resize: $.noop,
   
-  setScale: function () {
-    this.scaleline = false;
-    this.base();
+  //setScale: function () {
+  makeFirstImage: function () {
+    this.view.prop('scaleline', false);
+    this.base.apply(this, arguments);
   },
   
-  render: function () {
-    this.base.apply(this, arguments);
-    this.drawnScale = this.scale;
+  render: function (f, img) {
+    //this.base.apply(this, arguments);
+    //this.drawnScale = this.scale;
+    this.base(f, img);
+    this.view.prop('drawnScale', img.data('scale'));
   },
   
   positionFeatures: function (features, params) {
-    if (this.scale === this.drawnScale) {
+    if (params.scale === this.drawnScale) {
       return false;
     } else if (this.scaleline) {
       return this.scaleline;
     }
     
     var text   = this.formatLabel(this.browser.length);
-    var text2  = this.strand === 1 ? 'Forward strand' : 'Reverse strand';
+    var text2  = this.track.strand === 1 ? 'Forward strand' : 'Reverse strand';
     var width1 = this.context.measureText(text).width;
     var width2 = this.context.measureText(text2).width;
     var bg     = this.browser.colors.background;
     var x1, x2;
     
-    switch (this.strand) {
+    switch (this.track.strand) {
       case 1  : x1 = 0;  x2 = this.width - width2 - 40; break;
       default : x1 = 25; x2 = 30; break;
     }
@@ -45,13 +48,13 @@ Genoverse.Track.Scaleline = Genoverse.Track.Static.extend({
   },
   
   decorateFeature: function (feature, context) {
-    var x = this.strand === 1 ? this.width - 25 : 25;
+    var x = this.track.strand === 1 ? this.width - 25 : 25;
     
     context.strokeStyle = this.color;
     
     context.beginPath();
     context.moveTo(x,                      this.height * 0.25);
-    context.lineTo(x + (this.strand * 20), this.height * 0.5);
+    context.lineTo(x + (this.track.strand * 20), this.height * 0.5);
     context.lineTo(x,                      this.height * 0.75);
     context.closePath();
     context.stroke();
