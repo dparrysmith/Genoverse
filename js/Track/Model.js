@@ -4,10 +4,8 @@ Genoverse.Track.Model = Base.extend({
   xhrFields  : {},
   dataType   : 'json',
   allData    : false,
-  
   url        : undefined,
   urlParams  : undefined, // hash of URL params
-  threshold  : undefined,
   
   constructor: function (properties) {
     $.extend(this, properties);

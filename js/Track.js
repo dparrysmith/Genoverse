@@ -31,7 +31,6 @@ Genoverse.Track = Base.extend({
     }
     
     var lengthSettings = this.getSettingsForLength();
-    
     var settings       = $.extend(true, {}, lengthSettings, this.constructor.prototype); // model, view, options
     var mvc            = [ 'model', 'view', 'controller' ];
     var mvcSettings    = {};
@@ -47,7 +46,7 @@ Genoverse.Track = Base.extend({
     }
     
     for (i in settings) {
-      if (!/^(constructor|init|base|extend)$/.test(i)) {
+      if (!/^(constructor|init|setDefaults|base|extend)$/.test(i)) {
         if (this._interface[i]) {
           mvcSettings[this._interface[i]][typeof settings[i] === 'function' ? 'func' : 'prop'][i] = settings[i];
         } else if (!Genoverse.Track.prototype.hasOwnProperty(i) && !/^(controller|model|view)$/.test(i)) {
@@ -90,15 +89,15 @@ Genoverse.Track = Base.extend({
           this[obj] = new (settings[obj].extend(mvcSettings[obj].func))(mvcSettings[obj].prop);
         }
       } else {
-        this[obj] = settings[obj];
+        this[obj] = $.extend(settings[obj], mvcSettings[obj].prop);
+        this[obj].extend(mvcSettings[obj].func);
       }
     }
     
     if (!this.controller || typeof this.controller === 'function') {
       this.controller = new (settings.controller.extend(mvcSettings.controller.func))($.extend(mvcSettings.controller.prop, { model: this.model, view: this.view }));
     } else {
-      this.controller.model = this.model;
-      this.controller.view  = this.view;
+      $.extend(this.controller, { model: this.model, view: this.view, threshold: mvcSettings.controller.prop.threshold || this.controller.constructor.prototype.threshold });
     }
     
     if (lengthSettings) {
@@ -108,16 +107,16 @@ Genoverse.Track = Base.extend({
   },
   
   setLengthMap: function () {
-    var j = false;
-    var value;
+    var value, j;
     
     this.lengthMap = [];
     
     for (var key in this) { // Find all scale-map like keys
       if (!isNaN(key)) {
+        key   = parseInt(key, 10);
         value = this[key];
         delete this[key];
-        this.lengthMap.push([ parseInt(key, 10), value ]);
+        this.lengthMap.push([ key, value === false ? { threshold: key, fixedHeight: false } : value ]);
       }
     }
     
@@ -127,15 +126,17 @@ Genoverse.Track = Base.extend({
     }
     
     for (var i = 0; i < this.lengthMap.length; i++) {
-      if (j !== false) {
-        this.lengthMap[j][1].model = this.lengthMap[j][1].model || this.lengthMap[i][1].model;
-        this.lengthMap[j][1].view  = this.lengthMap[j][1].view  || this.lengthMap[i][1].view;
-      } else {
-        j = i;
+      if (this.lengthMap[i][1].model && this.lengthMap[i][1].view) {
+        continue;
       }
       
-      if (this.lengthMap[j][1].model && this.lengthMap[j][1].view) {
-        j = false;
+      for (j = i + 1; j < this.lengthMap.length; j++) {
+        this.lengthMap[i][1].model = this.lengthMap[i][1].model || this.lengthMap[j][1].model;
+        this.lengthMap[i][1].view  = this.lengthMap[i][1].view  || this.lengthMap[j][1].view;
+        
+        if (this.lengthMap[i][1].model && this.lengthMap[i][1].view) {
+          break;
+        }
       }
     }
   },
@@ -160,4 +161,3 @@ Genoverse.Track = Base.extend({
     });
   }
 });
-

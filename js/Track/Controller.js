@@ -1,13 +1,13 @@
 Genoverse.Track.Controller = Base.extend({
-  scrollBuffer : 1.2, // number of widths, if left or right closer to the edges of viewpoint than the buffer, start making more images
+  scrollBuffer : 1.2,       // number of widths, if left or right closer to the edges of viewpoint than the buffer, start making more images
+  threshold    : Infinity,  // length above which the track is not drawn
+  name         : undefined, // maybe?
+  unsortable   : undefined, // maybe?
   messages     : {
     error     : 'ERROR: ',
     threshold : 'Data for this track is not displayed in regions greater than ',
     resize    : 'Some features are currently hidden, resize to see all'
   },
-  
-  name         : undefined, // maybe?
-  unsortable   : undefined, // maybe?
   
   constructor: function (properties) {
     $.extend(this, properties);
@@ -50,8 +50,9 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   rename: function (name) {
-    this.name = name;
-    this.label.height(this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.view.prop('minLabelHeight', $('span.name', this.label).html(this.name).outerHeight(true))));
+    this.name           = name;
+    this.minLabelHeight = $('span.name', this.label).html(this.name).outerHeight(true);
+    this.label.height(this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.minLabelHeight));
   },
   
   addDomElements: function () {
@@ -75,11 +76,11 @@ Genoverse.Track.Controller = Base.extend({
       $('<div class="handle">').appendTo(this.label);
     }
     
-    this.view.prop('minLabelHeight', $('<span class="name" title="' + (this.name || '') + '">' + (this.name || '') + '</span>').appendTo(this.label).outerHeight(true));
+    this.minLabelHeight = $('<span class="name" title="' + (this.name || '') + '">' + (this.name || '') + '</span>').appendTo(this.label).outerHeight(true);
     
-    var h = this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.view.prop('minLabelHeight'));
+    var h = this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.minLabelHeight);
     
-    if (this.view.prop('minLabelHeight')) {
+    if (this.minLabelHeight) {
       this.label.height(h);
     }
     
@@ -178,17 +179,16 @@ Genoverse.Track.Controller = Base.extend({
       return;
     }
     
-    var thresholdMessage = this.view.prop('thresholdMessage');
     var autoHeight;
     
-    if (this.threshold && this.browser.length > this.threshold) {
+    if (this.browser.length > this.threshold) {
       autoHeight = this.view.prop('autoHeight');
       
       this.view.prop('autoHeight', true);
       
-      if (thresholdMessage) {
-        this.showMessage('threshold', thresholdMessage);
-        this.fullVisibleHeight = this.messageContainer.outerHeight(true);
+      if (this.thresholdMessage) {
+        this.showMessage('threshold', this.thresholdMessage);
+        this.fullVisibleHeight = Math.max(this.messageContainer.outerHeight(true), this.minLabelHeight);
       } else {
         this.fullVisibleHeight = 0;
       }
@@ -202,7 +202,7 @@ Genoverse.Track.Controller = Base.extend({
         height += Math.max.apply(Math, $.map(this.labelPositions.search(bounds), function (feature) { return feature.position[scale].label.bottom; }).concat(0));
       }
       
-      if (thresholdMessage) {
+      if (this.thresholdMessage) {
         this.hideMessage('threshold');
       }
       
@@ -233,8 +233,7 @@ Genoverse.Track.Controller = Base.extend({
       this.imgContainers.children('.labels').css('top', arguments[1]);
     }
     
-    this.container.height(height);
-    this.label.height(height)[height ? 'show' : 'hide']();
+    this.container.add(this.label).height(height)[height ? 'show' : 'hide']();
     this.toggleExpander();
   },
   
@@ -285,16 +284,13 @@ Genoverse.Track.Controller = Base.extend({
       this.model.setLabelBuffer(this.browser.labelBuffer);
     }
     
+    if (this.threshold && this.view.constructor.prototype.autoHeight !== 'force') {
+      this.thresholdMessage = this.view.formatLabel(this.threshold);
+    }
+    
     $.each(this.view.setScaleSettings(this.scale), function (k, v) { track[k] = v; });
     
     this.hideMessage();
-    
-   /* if (this.scrollContainer.children().hide().filter('.' + this.scrollStart).show().length) {
-      this.checkHeight();
-    } else {
-      this.scrollContainer.css('left', 0);
-      this.makeFirstImage();
-    }*/
   },
   
   move: function (delta) {
@@ -357,7 +353,7 @@ Genoverse.Track.Controller = Base.extend({
     params.labelHeight   = params.labelHeight   || 0;
     
     var deferred;
-    var tooLarge = this.threshold && this.threshold < this.browser.length;
+    var tooLarge = this.browser.length > this.threshold;
     var div      = this.imgContainer.clone().addClass((params.cls + ' loading').replace('.', '_')).css({ left: params.left, display: params.cls === this.scrollStart ? 'block' : 'none' });
     var bgImage  = params.background ? $('<img class="bg">').hide().addClass(params.background).data(params).prependTo(div) : false;
     var image    = $('<img class="data">').hide().data(params).appendTo(div).on('load', function () {
@@ -420,7 +416,7 @@ Genoverse.Track.Controller = Base.extend({
     }
     
     // FIXME: on zoom out, making more than 1 request
-    if (this.threshold && this.threshold < length || this.model.checkDataRange(start, end)) {
+    if (length > this.threshold || this.model.checkDataRange(start, end)) {
       makeImages();
     } else {
       var buffer = this.model.prop('dataBuffer');

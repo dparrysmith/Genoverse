@@ -16,7 +16,6 @@ Genoverse.Track.View = Base.extend({
   labels         : true,
   repeatLabel    : true,
   bump           : false,
-  
   depth          : undefined,
   featureHeight  : undefined, // defaults to track height
   margin         : undefined,
@@ -38,16 +37,13 @@ Genoverse.Track.View = Base.extend({
   
   setDefaults: function () {
     var margin = [ 'Top', 'Right', 'Bottom', 'Left' ];
-    //var protos = [ this.view.prototype, this.constructor.prototype ]; // Looks at values in the view, or the initial track config
     var protos = [ this.constructor.prototype, this.track.constructor.prototype ]; // Looks at values in the view, or the initial track config
     var i, j;
     
     var defaults = {
-      //featureHeight : function () { return this.view.prototype.height; }, // Base feature height must on default track height if not set
       featureHeight : function () { return this.constructor.prototype.height; }, // Base feature height must on default track height if not set
       margin        : function () { return this.browser.trackMargin; },
       fixedHeight   : function () { return this.featureHeight === this.height && !this.bump; },
-      //autoHeight    : function () { return !this.fixedHeight && this.height === this.view.prototype.height ? this.browser.autoHeight : false; },
       autoHeight    : function () { return !this.fixedHeight && this.height === this.constructor.prototype.height ? this.browser.autoHeight : false; },
       resizable     : function () { return !this.fixedHeight; }
     };
@@ -73,12 +69,11 @@ Genoverse.Track.View = Base.extend({
       }
     }
     
-    this.context        = $('<canvas>')[0].getContext('2d'); // FIXME: DOM element in view
-    this.height        += this.margin;
-    this.initialHeight  = this.height;
-    this.font           = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
-    this.labelUnits     = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
-    this.minLabelHeight = 0;
+    this.context       = $('<canvas>')[0].getContext('2d'); // FIXME: DOM element in view
+    this.height       += this.margin;
+    this.initialHeight = this.height;
+    this.font          = this.fontWeight + ' ' + this.fontHeight + 'px ' + this.fontFamily;
+    this.labelUnits    = [ 'bp', 'kb', 'Mb', 'Gb', 'Tb' ];
     
     if (this.hidden) {
       this.height = 0;
@@ -88,8 +83,6 @@ Genoverse.Track.View = Base.extend({
       this.autoHeight  = true;
       this.fixedHeight = false;
       this.resizable   = false;
-    } else if (this.threshold) {
-      this.thresholdMessage = this.formatLabel(this.threshold);
     }
     
     if (this.labels && this.labels !== 'overlay' && (this.depth || this.bump === 'labels')) {
@@ -157,7 +150,7 @@ Genoverse.Track.View = Base.extend({
     
     params.width         = Math.ceil(params.width);
     params.height        = Math.ceil(params.height);
-    params.featureHeight = Math.max(Math.ceil(params.featureHeight), this.fixedHeight ? Math.max(this.height, this.minLabelHeight) : 0);
+    params.featureHeight = Math.max(Math.ceil(params.featureHeight), this.fixedHeight ? Math.max(this.height, this.track.controller.minLabelHeight) : 0);
     params.labelHeight   = Math.ceil(params.labelHeight);
     
     return features;
@@ -384,7 +377,7 @@ Genoverse.Track.View = Base.extend({
     if (arguments[1] !== true && height < this.featureHeight) {
       height = 0;
     } else {
-      height = this.hidden ? 0 : Math.max(height, this.minLabelHeight);
+      height = this.hidden ? 0 : Math.max(height, this.track.controller.minLabelHeight);
     }
     
     this.height = height;
