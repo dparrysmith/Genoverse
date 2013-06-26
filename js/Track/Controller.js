@@ -284,7 +284,7 @@ Genoverse.Track.Controller = Base.extend({
       this.model.setLabelBuffer(this.browser.labelBuffer);
     }
     
-    if (this.threshold && this.view.constructor.prototype.autoHeight !== 'force') {
+    if (this.threshold !== Infinity && this.view.constructor.prototype.autoHeight !== 'force') {
       this.thresholdMessage = this.view.formatLabel(this.threshold);
     }
     

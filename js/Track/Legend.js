@@ -31,8 +31,9 @@ Genoverse.Track.on('afterCheckHeight', function () {
 });
 
 Genoverse.Track.Legend = Genoverse.Track.Static.extend({
-  textColor : '#000000',
-  labels    : 'overlay',
+  textColor  : '#000000',
+  labels     : 'overlay',
+  unsortable : true,
   
   controller: Genoverse.Track.Controller.Static.extend({
     init: function () {
