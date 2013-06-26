@@ -31,9 +31,12 @@ Genoverse.Track.Scaleline = Genoverse.Track.Static.extend({
     var bg     = this.browser.colors.background;
     var x1, x2;
     
-    switch (this.track.strand) {
-      case 1  : x1 = 0;  x2 = this.width - width2 - 40; break;
-      default : x1 = 25; x2 = 30; break;
+    if (this.track.strand === 1) {
+      x1 = 0;
+      x2 = this.width - width2 - 40;
+    } else {
+      x1 = 25;
+      x2 = 30;
     }
     
     this.scaleline = [

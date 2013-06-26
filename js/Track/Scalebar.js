@@ -76,7 +76,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
       this.track.seen[x] = 1;
       
       feature = { id: x, strand: 1, sort: x };
-      major   = x && !(x % this.track.majorUnit);
+      major   = x && x % this.track.majorUnit === 0;
       
       if (flip === 1) {
         feature.start = x;

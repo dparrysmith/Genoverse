@@ -217,7 +217,7 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   autoResize: function () {
-    var autoHeight = this.view.prop('autoHeight')
+    var autoHeight = this.view.prop('autoHeight');
     
     if (autoHeight || this.view.prop('labels') === 'separate') {
       this.resize(autoHeight ? this.fullVisibleHeight : this.view.prop('height'), this.labelTop);
@@ -343,7 +343,7 @@ Genoverse.Track.Controller = Base.extend({
     }
   },
   
-  makeImage: function (params, xxx) {
+  makeImage: function (params) {
     var track = this;
     
     params.scaledStart   = params.scaledStart   || params.start * params.scale;

@@ -260,7 +260,7 @@ var Genoverse = Base.extend({
     var func = args.shift();
     var mvc;
     
-    for (i = 0; i < this.tracks.length; i++) {
+    for (var i = 0; i < this.tracks.length; i++) {
       mvc = this.tracks[i]._interface[func];
       this.tracks[i][mvc][func].apply(this.tracks[i][mvc], args);
     }
