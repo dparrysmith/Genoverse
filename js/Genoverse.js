@@ -660,8 +660,8 @@ var Genoverse = Base.extend({
         this.tracksById[tracks[i].id] = tracks[i];
       }
       
-      if (tracks[i].controller.strand === -1 && tracks[i].controller.orderReverse) {
-        tracks[i].controller.order = tracks[i].controller.orderReverse;
+      if (tracks[i].strand === -1 && tracks[i].orderReverse) {
+        tracks[i].order = tracks[i].orderReverse;
       }
       
       if (push) {
@@ -712,7 +712,7 @@ var Genoverse = Base.extend({
       return;
     }
     
-    var sorted     = $.extend([], this.tracks).sort(function (a, b) { return a.controller.order - b.controller.order; });
+    var sorted     = $.extend([], this.tracks).sort(function (a, b) { return a.order - b.order; });
     var labels     = $();
     var containers = $();
     
@@ -729,8 +729,6 @@ var Genoverse = Base.extend({
     this.wrapper.append(containers);
     
     // Correct the order
-    //this.tracks = labels.map(function () { return $(this).data('track'); }).each(function () {
-    
     this.tracks = sorted;
     
     labels.map(function () { return $(this).data('track'); }).each(function () {
@@ -745,10 +743,10 @@ var Genoverse = Base.extend({
   },
   
   updateTrackOrder: function (e, ui) {
-    var track = ui.item.data('track');
+    var track = ui.item.data('track').track;
     
-    var p = ui.item.prev().data('track').order || 0;
-    var n = ui.item.next().data('track').order || 0;
+    var p = ui.item.prev().data('track').track.order || 0;
+    var n = ui.item.next().data('track').track.order || 0;
     var o = p || n;
     var order;
     

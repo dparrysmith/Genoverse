@@ -9,22 +9,26 @@ Genoverse.Track.Model = Base.extend({
   urlParams  : undefined, // hash of URL params
   threshold  : undefined,
   
-  constructor : function () {
+  constructor: function (properties) {
+    $.extend(this, properties);
     Genoverse.wrapFunctions(this);
-    
-    if (this.url) {
-      this._url = this.url; // Remember original url
-      this.setURL();
-    }
-    
     this.init();
   },
   
   init: function () {
+    this.setDefaults();
+    
     this.dataRanges   = new RTree();
     this.features     = new RTree();
     this.featuresById = {};
     this.dataLoading  = []; // tracks incomplete requests for data
+  },
+  
+  setDefaults: function () {
+    if (this.url) {
+      this._url = this.url; // Remember original url
+      this.setURL();
+    }
   },
   
   setURL: function (urlParams, update) {
@@ -43,7 +47,7 @@ Genoverse.Track.Model = Base.extend({
       start = 1;
       end   = this.browser.chromosomeSize;
     }
-
+    
     return (url || this.url).replace(/__CHR__/, this.browser.chr).replace(/__START__/, start).replace(/__END__/, end);
   },
   

@@ -1,6 +1,6 @@
 Genoverse.Track.Controller.Static = Genoverse.Track.Controller.extend({
-  constructor: function (config) {
-    this.base(config);
+  constructor: function (properties) {
+    this.base(properties);
     
     this.image = $('<img>').appendTo(this.imgContainer);
     this.container.toggleClass('track_container track_container_static').html(this.imgContainer);

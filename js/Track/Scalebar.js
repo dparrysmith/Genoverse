@@ -103,6 +103,14 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     }
   },
   
+  makeFirstImage: function (moveTo) {
+    if (this.strand === -1) {
+      moveTo = this.track.forwardTrack.scrollStart;
+    }
+    
+    return this.base(moveTo);
+  },
+  
   makeImage: function (params) {
     params.background    = 'guidelines fullHeight';
     params.featureHeight = this.height;

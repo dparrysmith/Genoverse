@@ -24,12 +24,22 @@ Genoverse.Track.View = Base.extend({
   autoHeight     : undefined,
   resizable      : undefined,
   
-  constructor: function () {
+  constructor: function (properties) {
+    $.extend(this, properties);
     Genoverse.wrapFunctions(this);
-    
+    this.init();
+  },
+  
+  // difference between init and constructor: init gets called on reset, if reset is implemented
+  init: function () {
+    this.setDefaults();
+    this.scaleSettings = {};
+  },
+  
+  setDefaults: function () {
     var margin = [ 'Top', 'Right', 'Bottom', 'Left' ];
     //var protos = [ this.view.prototype, this.constructor.prototype ]; // Looks at values in the view, or the initial track config
-    var protos = [ this.constructor.prototype/*, this.track.constructor.prototype*/ ]; // Looks at values in the view, or the initial track config
+    var protos = [ this.constructor.prototype, this.track.constructor.prototype ]; // Looks at values in the view, or the initial track config
     var i, j;
     
     var defaults = {
@@ -85,13 +95,6 @@ Genoverse.Track.View = Base.extend({
     if (this.labels && this.labels !== 'overlay' && (this.depth || this.bump === 'labels')) {
       this.labels = 'separate';
     }
-    
-    this.init();
-  },
-  
-  // difference between init and constructor: init gets called on reset, if reset is implemented
-  init: function () {
-    this.scaleSettings = {};
   },
   
   setScaleSettings: function (scale) { // FIXME: not really a setter, as it returns.

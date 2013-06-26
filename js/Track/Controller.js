@@ -7,24 +7,21 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   name         : undefined, // maybe?
-  order        : undefined,
-  orderReverse : undefined,
   unsortable   : undefined, // maybe?
   
-  constructor: function () {
+  constructor: function (properties) {
+    $.extend(this, properties);
     Genoverse.wrapFunctions(this);
-    
-    this.imgRange    = {};
-    this.scrollRange = {};
-    this.order       = typeof this.order !== 'undefined' ? this.order : this.index;
-    
-    this.addDomElements();
-    this.addUserEventHandlers();
-    
     this.init();
   },
   
-  init: $.noop,
+  init: function () {
+    this.imgRange    = {};
+    this.scrollRange = {};
+    
+    this.addDomElements();
+    this.addUserEventHandlers();
+  },
   
   reset: function () {
     this.resetImages();
@@ -399,7 +396,7 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   makeFirstImage: function (moveTo) {
-    if (this.scrollContainer.children().hide().filter('.' + (moveTo || this.scrollStart)).show().length) { 
+    if (this.scrollContainer.children().hide().filter('.' + (moveTo || this.scrollStart)).show().length) {
       if (moveTo) {
         this.scrollContainer.css('left', 0);
       }

@@ -1,5 +1,7 @@
 Genoverse.Track.Controller.Stranded = Genoverse.Track.Controller.extend({
-  constructor: function () {
+  constructor: function (properties) {
+    this.base(properties);
+  
     if (this.track.strand) {
       this.strand = this.track.strand;
     }
@@ -24,15 +26,13 @@ Genoverse.Track.Controller.Stranded = Genoverse.Track.Controller.extend({
     if (!(this.model instanceof Genoverse.Track.Model.Stranded)) {
       this.track.lengthMap.push([ -9e99, { model: Genoverse.Track.Model.Stranded }]);
     }
-    
-    this.base();
   },
   
   init: function () {
     this.base();
     
-    if (this.reverseTrack) {
-      this.reverseTrack.model.prop('features', this.model.prop('features'));
+    if (this.track.forwardTrack) {
+      this.model.prop('features', this.track.forwardTrack.model.prop('features'));
     }
   },
   
