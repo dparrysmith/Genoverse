@@ -90,7 +90,7 @@ Genoverse.Track = Base.extend({
         }
       } else {
         this[obj] = $.extend(settings[obj], mvcSettings[obj].prop);
-        this[obj].extend(mvcSettings[obj].func);
+        this[obj].constructor.extend(mvcSettings[obj].func);
       }
     }
     
