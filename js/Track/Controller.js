@@ -406,12 +406,28 @@ Genoverse.Track.Controller = Base.extend({
     var length  = this.browser.length;
     var scale   = this.scale;
     var cls     = this.scrollStart;
-    var loading = this.imgContainer.clone().addClass('loading').prependTo(this.scrollContainer.css('left', 0));
+    var images  = [{ start: start, end: end, scale: scale, cls: cls, left: 0 }];
+    var left    = 0;
+    var width   = this.width;
+    
+    if (start > 1) {
+      images.push({ start: start - length, end: start - 1, scale: scale, cls: cls, left: -this.width });
+      left   = -this.width;
+      width += this.width;
+    }
+    
+    if (end < this.browser.chromosomeSize) {
+      images.push({ start: end + 1, end: end + length, scale: scale, cls: cls, left: this.width });
+      width += this.width;
+    }
+    
+    var loading = this.imgContainer.clone().addClass('loading').css({ left: left, width: width }).prependTo(this.scrollContainer.css('left', 0));
     
     function makeImages() {
-      track.makeImage({ start: start,          end: end,          scale: scale, cls: cls, left: 0            });
-      track.makeImage({ start: start - length, end: start - 1,    scale: scale, cls: cls, left: -track.width });
-      track.makeImage({ start: end + 1,        end: end + length, scale: scale, cls: cls, left: track.width  });
+      for (var i = 0; i < images.length; i++) {
+        track.makeImage(images[i]);
+      }
+      
       loading.remove();
     }
     

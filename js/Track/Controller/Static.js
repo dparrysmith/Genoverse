@@ -4,18 +4,15 @@ Genoverse.Track.Controller.Static = Genoverse.Track.Controller.extend({
     
     this.image = $('<img>').appendTo(this.imgContainer);
     this.container.toggleClass('track_container track_container_static').html(this.imgContainer);
-    
-    //this.setScale();
   },
   
-  reset           : $.noop,
+  reset: $.noop,
   
   setWidth: function (width) {
     this.base(width);
     this.image.width = width;
   },
   
-  //setScale: function () {
   makeFirstImage: function () {
     this.base.apply(this, arguments);
     this.container.css('left', 0);
@@ -31,7 +28,6 @@ Genoverse.Track.Controller.Static = Genoverse.Track.Controller.extend({
       if (this.stringified !== string) {
         params.width         = this.width;
         params.featureHeight = this.view.prop('height');
-        //params.height = this.view.prop('height');
         
         this.render(features, this.image.data(params));
         this.imgContainer.children(':last').show();
@@ -46,13 +42,12 @@ Genoverse.Track.Controller.Static = Genoverse.Track.Controller.extend({
 });
 
 Genoverse.Track.Model.Static = Genoverse.Track.Model.extend({
-  url: false,
-  checkDataRange  : function () { return true; }
+  url            : false,
+  checkDataRange : function () { return true; }
 });
 
 Genoverse.Track.View.Static = Genoverse.Track.View.extend({
   featureMargin : { top: 0, right: 1, bottom: 0, left: 1 },
-  
   fixedHeight   : true,
   unsortable    : true,
   

@@ -3,6 +3,8 @@ Genoverse.Track = Base.extend({
     this.setInterface();
     this.extend(config); // TODO: check when track is { ... } instead of Genoverse.Track.extend({ ... })
     
+    Genoverse.wrapFunctions(this);
+    
     this.order = typeof this.order !== 'undefined' ? this.order : this.index;
     
     this.setLengthMap();
@@ -69,8 +71,6 @@ Genoverse.Track = Base.extend({
       if (obj === 'controller') {
         continue;
       }
-      
-      // FIXME: change before/afterInit events to something else, since init exists in all of m, v, c
       
       if (typeof settings[obj] === 'function') {
         if (this[obj] && this[obj].constructor.ancestor === settings[obj]) {

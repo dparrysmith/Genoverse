@@ -7,15 +7,12 @@ Genoverse.Track.Scaleline = Genoverse.Track.Static.extend({
   
   resize: $.noop,
   
-  //setScale: function () {
   makeFirstImage: function () {
     this.view.prop('scaleline', false);
     this.base.apply(this, arguments);
   },
   
   render: function (f, img) {
-    //this.base.apply(this, arguments);
-    //this.drawnScale = this.scale;
     this.base(f, img);
     this.view.prop('drawnScale', img.data('scale'));
   },

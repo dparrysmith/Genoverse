@@ -6,6 +6,7 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   controls      : 'off',
   height        : 20,
   featureHeight : 3,
+  featureMargin : { top: 0, right: 0, bottom: 2, left: 0 },
   margin        : 0,
   color         : '#000000',
   autoHeight    : false,
@@ -186,6 +187,6 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
   }
 });
 
-Genoverse.Track.on('afterInit afterResize', function () {
+Genoverse.Track.on('afterResize', function () {
   $('.bg.fullHeight', this.browser.container).height(this.browser.wrapper.outerHeight(true));
 });
