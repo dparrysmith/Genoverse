@@ -45,8 +45,7 @@ var defaultControls = [
   }),
   
   $('<a title="Close track">').html('x').on('click', function () {
-    var track = $(this).data('track');
-    track.remove();
+    $(this).data('track').remove();
   })
 ];
 

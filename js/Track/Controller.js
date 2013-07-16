@@ -1,8 +1,7 @@
 Genoverse.Track.Controller = Base.extend({
-  scrollBuffer : 1.2,       // number of widths, if left or right closer to the edges of viewpoint than the buffer, start making more images
-  threshold    : Infinity,  // length above which the track is not drawn
-  name         : undefined, // maybe?
-  unsortable   : undefined, // maybe?
+  scrollBuffer : 1.2,       // Number of widths, if left or right closer to the edges of viewpoint than the buffer, start making more images
+  threshold    : Infinity,  // Length above which the track is not drawn
+  name         : undefined, // Need to have name in the interface, as Function.name exists, so prop('name') will not work properly
   messages     : {
     error     : 'ERROR: ',
     threshold : 'Data for this track is not displayed in regions greater than ',
@@ -56,6 +55,8 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   addDomElements: function () {
+    var name = this.name || '';
+    
     this.menus            = $();
     this.container        = $('<div class="track_container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
@@ -68,13 +69,13 @@ Genoverse.Track.Controller = Base.extend({
       $('<div class="track_border">').appendTo(this.container);
     }
     
-    if (this.unsortable) {
+    if (this.prop('unsortable')) {
       this.label.addClass('unsortable');
     } else {
       $('<div class="handle">').appendTo(this.label);
     }
     
-    this.minLabelHeight = $('<span class="name" title="' + (this.name || '') + '">' + (this.name || '') + '</span>').appendTo(this.label).outerHeight(true);
+    this.minLabelHeight = $('<span class="name" title="' + name + '">' + name + '</span>').appendTo(this.label).outerHeight(true);
     
     var h = this.prop('hidden') ? 0 : Math.max(this.prop('height'), this.minLabelHeight);
     
@@ -461,31 +462,21 @@ Genoverse.Track.Controller = Base.extend({
     return feature;
   },
   
-  show: function () { // FIXME: move to view
-    this.prop('hidden', false);
-    this.resize(this.prop('initialHeight'));
-  },
-  
-  hide: function () { // FIXME: move to view
-    this.prop('hidden', true);
-    this.resize(0);
-  },
-  
   enable: function () {
-    this.show();
+    this.view.show();
     this.disabled = false;
     this.makeFirstImage();
   },
   
   disable: function () {
-    this.hide();
+    this.view.hide();
     this.scrollContainer.css('left', 0);
     this.reset();
     this.disabled = true;
   },
   
   remove: function () {
-    this.browser.removeTrack(this);
+    this.browser.removeTrack(this.track);
   },
   
   destroy: function () {
@@ -494,17 +485,5 @@ Genoverse.Track.Controller = Base.extend({
     for (var key in this) {
       delete this[key];
     }
-  }/*,
-  
-  systemEventHandlers : {}*/
-}/*, {
-  on: function (events, handler) {
-    $.each(events.split(' '), function () {
-      if (typeof Genoverse.Track.prototype.systemEventHandlers[this] === 'undefined') {
-        Genoverse.Track.prototype.systemEventHandlers[this] = [];
-      }
-      
-      Genoverse.Track.prototype.systemEventHandlers[this].push(handler);
-    });
   }
-}*/);
+});

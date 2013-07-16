@@ -202,5 +202,3 @@ Genoverse.Track.Model = Base.extend({
     this.dataLoading = [];
   }
 });
-
-

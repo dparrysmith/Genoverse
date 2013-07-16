@@ -1,9 +1,3 @@
-/* FIXME:
-  
-  resetFeaturePositions
-
-  context - canvas not attached to DOM
-*/
 Genoverse.Track.View = Base.extend({
   height         : 12,
   featureMargin  : { top: 3, right: 1, bottom: 1, left: 0 }, // left is never used
@@ -105,16 +99,6 @@ Genoverse.Track.View = Base.extend({
     
     return this.scaleSettings[scale];
   },
-  
-  /*resetFeaturePositions: function () {
-    this.scaleSettings    = {};
-    this.featurePositions = new RTree();
-    this.labelPositions   = this.labels === 'separate' ? new RTree() : this.featurePositions;
-    
-    for (var id in this.featuresById) {
-      delete this.featuresById[id].position;
-    }
-  },*/
   
   scaleFeatures: function (features, scale) {
     var add = Math.max(scale, 1);
@@ -377,8 +361,16 @@ Genoverse.Track.View = Base.extend({
     return height;
   },
   
-  drawBackground  : $.noop,
-  decorateFeature : $.noop, // decoration for the features
+  show: function () {
+    this.prop('hidden', false);
+    this.resize(this.prop('initialHeight'));
+  },
   
- // systemEventHandlers : {}
+  hide: function () {
+    this.prop('hidden', true);
+    this.resize(0);
+  },
+  
+  drawBackground  : $.noop,
+  decorateFeature : $.noop // decoration for the features
 });
