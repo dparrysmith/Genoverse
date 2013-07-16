@@ -3,41 +3,21 @@
 use strict;
 use Data::Dumper;
 
-my @files = qw(
-  lib/jquery.js 
-  lib/jquery-ui.js 
-  lib/lazyload.js 
-  lib/jquery.mousewheel.js 
-  lib/jquery.mousehold.js 
-  lib/Base.js 
-  lib/rtree.js 
-  lib/FRegion.js
+my @files;
 
-  genomes/grch37.js
+open INDEX, 'expanded.html' or die $!;
+while (<INDEX>) {
+  if ($_ =~ /<script[^>]+src="(.*)"/) {
+    push @files, $1;
+  }
+}
 
-  Genoverse.js
-  Track.js
-  Track/Scalebar.js
-  Track/Sequence.js
-  Track/Fasta.js
-
-  Track/File.js
-  Track/VCF.js
-  Track/BED.js
-  Track/GFF3.js
-
-  Track/DAS.js
-  Track/DAS/colorMap.js
-  Track/DAS/Transcript.js
-);
-
-chdir 'js' or die "ERROR: $!\n Please run me from the top folder genoverse";
-open COMBINED, '>', 'latest.js' or die $!;
+open COMBINED, '>', 'js/genoverse.combined.js' or die $!;
 
 print COMBINED "(function () {\n";
 for (@files) {
   local $|=1;  
-  open my $FILE, '<', $_ or die "Can't open '$_' for read: $!";
+  open my $FILE, '<', $_ or warn "Can't open '$_' for read: $!";
   while (<$FILE>) {
     print COMBINED;
   }

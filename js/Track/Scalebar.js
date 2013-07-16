@@ -1,6 +1,6 @@
 Genoverse.Track.Scalebar = Genoverse.Track.extend({
   unsortable    : true,
-  order         : 0,
+  order         : 1,
   orderReverse  : 1e5,
   featureStrand : 1,
   controls      : 'off',
@@ -189,4 +189,8 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
 
 Genoverse.Track.on('afterResize', function () {
   $('.bg.fullHeight', this.browser.container).height(this.browser.wrapper.outerHeight(true));
+});
+
+Genoverse.on('afterAddTracks', function () {
+  $('.bg.fullHeight', this.container).height(this.wrapper.outerHeight(true));
 });

@@ -660,10 +660,6 @@ var Genoverse = Base.extend({
         this.tracksById[tracks[i].id] = tracks[i];
       }
       
-      if (tracks[i].strand === -1 && tracks[i].orderReverse) {
-        tracks[i].order = tracks[i].orderReverse;
-      }
-      
       if (push) {
         this.tracks.push(tracks[i]);
         

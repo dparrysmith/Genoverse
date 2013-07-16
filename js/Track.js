@@ -5,7 +5,7 @@ Genoverse.Track = Base.extend({
     
     Genoverse.wrapFunctions(this);
     
-    this.order = typeof this.order !== 'undefined' ? this.order : this.index;
+    this.order = this.order || this.index;
     
     this.setLengthMap();
     this.setMVC();
@@ -100,6 +100,10 @@ Genoverse.Track = Base.extend({
       this.controller = new (settings.controller.extend(mvcSettings.controller.func))($.extend(mvcSettings.controller.prop, { model: this.model, view: this.view }));
     } else {
       $.extend(this.controller, { model: this.model, view: this.view, threshold: mvcSettings.controller.prop.threshold || this.controller.constructor.prototype.threshold });
+    }
+    
+    if (this.strand === -1 && this.orderReverse) {
+      this.order = this.orderReverse;
     }
     
     if (lengthSettings) {
