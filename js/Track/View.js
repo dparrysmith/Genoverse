@@ -365,14 +365,6 @@ Genoverse.Track.View = Base.extend({
     return Math.floor(label) + (unit === 'bp' ? '' : '.' + (label.toString().split('.')[1] || '').concat('00').substring(0, 2)) + ' ' + unit;
   },
   
-  prop: function (key, value) {
-    if (typeof value !== 'undefined') {
-      this[key] = value;
-    }
-    
-    return this[key];
-  },
-  
   setHeight: function (height) {
     if (arguments[1] !== true && height < this.featureHeight) {
       height = 0;

@@ -62,7 +62,7 @@ Genoverse.Track.Legend = Genoverse.Track.Static.extend({
     var features = {};
     
     $.each($.map(this.track.tracks, function (track) {
-      bounds.h = track.view.prop('height');
+      bounds.h = track.prop('height');
       return track.controller.featurePositions.search(bounds).concat(track.controller.labelPositions.search(bounds));
     }), function () {
       if (this.legend) {

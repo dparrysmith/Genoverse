@@ -32,7 +32,7 @@ Genoverse.Track.Controller.Stranded = Genoverse.Track.Controller.extend({
     this.base();
     
     if (this.track.forwardTrack) {
-      this.model.prop('features', this.track.forwardTrack.model.prop('features'));
+      this.prop('features', this.track.forwardTrack.prop('features'));
     }
   },
   

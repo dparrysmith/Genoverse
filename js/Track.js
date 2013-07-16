@@ -35,6 +35,7 @@ Genoverse.Track = Base.extend({
     var lengthSettings = this.getSettingsForLength();
     var settings       = $.extend(true, {}, lengthSettings, this.constructor.prototype); // model, view, options
     var mvc            = [ 'model', 'view', 'controller' ];
+    var propFunc       = $.proxy(this.prop, this);
     var mvcSettings    = {};
     var trackSettings  = {};
     var obj, j;
@@ -62,6 +63,7 @@ Genoverse.Track = Base.extend({
     for (i = 0; i < 3; i++) {
       obj = mvc[i];
       
+      mvcSettings[obj].func.prop                = propFunc;
       mvcSettings[obj].func.systemEventHandlers = this.systemEventHandlers;
       mvcSettings[obj].prop.browser             = this.browser;
       mvcSettings[obj].prop.width               = this.width;
@@ -147,6 +149,31 @@ Genoverse.Track = Base.extend({
         return this.lengthMap[i][1];
       }
     }
+  },
+  
+  prop: function (key, value) {
+    var mvc = [ 'controller', 'model', 'view' ];
+    var obj;
+    
+    if (this._interface[key]) {
+      obj = this[this._interface[key]];
+    } else {
+      for (var i = 0; i < 3; i++) {
+        if (this[mvc[i]] && typeof this[mvc[i]][key] !== 'undefined') {
+          obj = this[mvc[i]];
+          break;
+        }
+      }
+      
+      obj = obj || this;
+    }
+    
+    
+    if (typeof value !== 'undefined') {
+      obj[key] = value;
+    }
+    
+    return obj[key];
   },
   
   systemEventHandlers: {}

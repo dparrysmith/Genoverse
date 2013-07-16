@@ -594,14 +594,14 @@ var Genoverse = Base.extend({
     for (var i = 0; i < this.tracks.length; i++) {
       track = this.tracks[i];
       
-      if (track.view.prop('resizable')) {
-        track.view.prop('autoHeight', !!([ track.view.prop('defaultAutoHeight'), this.autoHeight ].sort(function (a, b) {
+      if (track.prop('resizable')) {
+        track.prop('autoHeight', !!([ track.prop('defaultAutoHeight'), this.autoHeight ].sort(function (a, b) {
           return (typeof a !== 'undefined' && a !== null ? 0 : 1) - (typeof b !== 'undefined' && b !== null ?  0 : 1);
         })[0]));
         
-        track.controller.heightToggler[track.view.prop('autoHeight') ? 'addClass' : 'removeClass']('auto_height');
-        track.view.setHeight(track.view.prop('defaultHeight') + track.view.prop('margin'));
-        track.view.prop('initialHeight', track.view.prop('height'));
+        track.controller.heightToggler[track.prop('autoHeight') ? 'addClass' : 'removeClass']('auto_height');
+        track.view.setHeight(track.prop('defaultHeight') + track.prop('margin'));
+        track.prop('initialHeight', track.prop('height'));
       }
     }
   },

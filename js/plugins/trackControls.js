@@ -16,24 +16,31 @@ var defaultControls = [
   
   $('<a class="height_toggle">').html('&nbsp;').on({
     click: function () {
-      var track = $(this).data('track');
+      var controller = $(this).data('track');
+      var track      = controller.track;
       var height;
       
-      if (track.view.prop('autoHeight', !track.view.prop('autoHeight'))) {
-        track.heightBeforeToggle = track.height;
-        height = track.fullVisibleHeight;
+      if (track.prop('autoHeight', !track.prop('autoHeight'))) {
+        track.prop('heightBeforeToggle', track.prop('height'));
+        height = track.prop('fullVisibleHeight');
       } else {
-        height = track.heightBeforeToggle || track.view.prop('initialHeight');
+        height = track.prop('heightBeforeToggle') || track.prop('initialHeight');
       }
       
       $(this).trigger('toggleState');
       
-      track.resize(height, true);
+      controller.resize(height, true);
     },
     toggleState: function () { // custom event to set title and change the icon
-      var autoHeight = $(this).data('track').autoHeight;
+      var track = $(this).data('track').track;
+      var autoHeight = track.prop('autoHeight');
+      
       this.title = autoHeight ? 'Set track to fixed height' : 'Set track to auto-adjust height';
       $(this)[autoHeight ? 'addClass' : 'removeClass']('auto_height');
+      
+      if (track.resizer) {
+        track.resizer[autoHeight ? 'hide' : 'show']();
+      }
     }
   }),
   
@@ -77,19 +84,19 @@ Genoverse.Track.on('afterAddDomElements', function () {
 
 Genoverse.Track.on('afterResize', function() {
   if (this.trackControls) {
-    this.trackControls[this.view.prop('height') < this.trackControls.outerHeight(true) ? 'hide' : 'show']();
+    this.trackControls[this.prop('height') < this.trackControls.outerHeight(true) ? 'hide' : 'show']();
   }
 });
 
 Genoverse.Track.on('afterResetHeight', function () {
-  if (this.resizable && this.heightToggler) {
-    this.heightToggler[this.view.prop('autoHeight') ? 'addClass' : 'removeClass']('auto_height');
+  if (this.prop('resizable') && this.heightToggler) {
+    this.heightToggler[this.prop('autoHeight') ? 'addClass' : 'removeClass']('auto_height');
     this.heightToggler.trigger('toggleState');
   }
 });
 
-Genoverse.Track.on('afterSetModelView', function () {
-  if (this.heightToggler) {
-    this.heightToggler.trigger('toggleState')[!this.view.prop('fixedHeight') && this.view.prop('resizable') !== false ? 'removeClass' : 'addClass']('hidden');
+Genoverse.Track.on('afterSetMVC', function () {
+  if (this.controller.heightToggler) {
+    this.controller.heightToggler.trigger('toggleState')[this.prop('fixedHeight') || this.prop('resizable') === false ? 'addClass' : 'removeClass']('hidden');
   }
 });

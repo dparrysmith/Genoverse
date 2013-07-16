@@ -52,18 +52,16 @@ Genoverse.Track.Controller = Base.extend({
   rename: function (name) {
     this.name           = name;
     this.minLabelHeight = $('span.name', this.label).html(this.name).outerHeight(true);
-    this.label.height(this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.minLabelHeight));
+    this.label.height(this.prop('hidden') ? 0 : Math.max(this.prop('height'), this.minLabelHeight));
   },
   
   addDomElements: function () {
-    var track = this;
-    
     this.menus            = $();
     this.container        = $('<div class="track_container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="scroll_container">').appendTo(this.container);
     this.imgContainer     = $('<div class="image_container">').width(this.width);
     this.messageContainer = $('<div class="message_container"><div class="messages"></div><span class="control collapse">&laquo;</span><span class="control expand">&raquo;</span></div>').appendTo(this.container);
-    this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.view.prop('height')).data('track', this);
+    this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.prop('height')).data('track', this);
     this.context          = $('<canvas>')[0].getContext('2d');
     
     if (this.browser.trackBorder) {
@@ -78,52 +76,31 @@ Genoverse.Track.Controller = Base.extend({
     
     this.minLabelHeight = $('<span class="name" title="' + (this.name || '') + '">' + (this.name || '') + '</span>').appendTo(this.label).outerHeight(true);
     
-    var h = this.view.prop('hidden') ? 0 : Math.max(this.view.prop('height'), this.minLabelHeight);
+    var h = this.prop('hidden') ? 0 : Math.max(this.prop('height'), this.minLabelHeight);
     
     if (this.minLabelHeight) {
       this.label.height(h);
     }
     
     this.container.height(h);
-    
-    if (!this.view.prop('fixedHeight') && this.view.prop('resizable') !== false) {
-      this.heightToggler = $('<div class="height_toggler"><div class="auto">Set track to auto-adjust height</div><div class="fixed">Set track to fixed height</div></div>').on({
-        mouseover : function () { $(this).children(track.view.prop('autoHeight') ? '.fixed' : '.auto').show(); },
-        mouseout  : function () { $(this).children().hide(); },
-        click     : function () {
-          var height;
-          
-          if (track.view.prop('autoHeight', !track.view.prop('autoHeight'))) {
-            track.heightBeforeToggle = track.view.prop('height');
-            height = track.fullVisibleHeight;
-          } else {
-            height = track.heightBeforeToggle || track.view.prop('initialHeight');
-          }
-          
-          $(this).toggleClass('auto_height').children(':visible').hide().siblings().show();
-          
-          track.resize(height, true);
-        }
-      }).addClass(this.view.prop('autoHeight') ? 'auto_height' : '').appendTo(this.label);
-    }
   },
   
   addUserEventHandlers: function () {
-    var track   = this;
-    var browser = this.browser;
+    var controller = this;
+    var browser    = this.browser;
     
     this.container.on('mouseup', '.image_container', function (e) {
       if ((e.which && e.which !== 1) || browser.start !== browser.dragStart || (browser.dragAction === 'select' && browser.selector.outerWidth(true) > 2)) {
         return; // Only show menus on left click when not dragging and not selecting
       }
 
-      track.click(e);
+      controller.click(e);
     });
     
     this.messageContainer.children().on('click', function () {
-      var collapsed = track.messageContainer.children('.messages').is(':visible') ? ' collapsed' : '';
-      track.messageContainer.attr('class', 'message_container' + collapsed);
-      track.checkHeight();
+      var collapsed = controller.messageContainer.children('.messages').is(':visible') ? ' collapsed' : '';
+      controller.messageContainer.attr('class', 'message_container' + collapsed);
+      controller.checkHeight();
     });
   },
   
@@ -148,7 +125,7 @@ Genoverse.Track.Controller = Base.extend({
     
     var height = this.messageContainer.show().outerHeight(true);
     
-    if (height > this.view.prop('height')) {
+    if (height > this.prop('height')) {
       this.resize(height);
     }
     
@@ -175,29 +152,29 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   checkHeight: function () {
-    if (this.view.prop('fixedHeight')) {
+    if (this.prop('fixedHeight')) {
       return;
     }
     
     var autoHeight;
     
     if (this.browser.length > this.threshold) {
-      autoHeight = this.view.prop('autoHeight');
+      autoHeight = this.prop('autoHeight');
       
-      this.view.prop('autoHeight', true);
+      this.prop('autoHeight', true);
       
       if (this.thresholdMessage) {
         this.showMessage('threshold', this.thresholdMessage);
-        this.fullVisibleHeight = Math.max(this.messageContainer.outerHeight(true), this.minLabelHeight);
+        this.prop('fullVisibleHeight', Math.max(this.messageContainer.outerHeight(true), this.minLabelHeight));
       } else {
-        this.fullVisibleHeight = 0;
+        this.prop('fullVisibleHeight', 0);
       }
     } else {
       var bounds = { x: this.browser.scaledStart, w: this.width, y: 0, h: 9e99 };
       var scale  = this.scale;
       var height = Math.max.apply(Math, $.map(this.featurePositions.search(bounds), function (feature) { return feature.position[scale].bottom; }).concat(0));
       
-      if (this.view.prop('labels') === 'separate') {
+      if (this.prop('labels') === 'separate') {
         this.labelTop = height;
         height += Math.max.apply(Math, $.map(this.labelPositions.search(bounds), function (feature) { return feature.position[scale].label.bottom; }).concat(0));
       }
@@ -206,21 +183,21 @@ Genoverse.Track.Controller = Base.extend({
         this.hideMessage('threshold');
       }
       
-      this.fullVisibleHeight = height || (this.messageContainer.is(':visible') ? this.messageContainer.outerHeight(true) : 0);
+      this.prop('fullVisibleHeight', height || (this.messageContainer.is(':visible') ? this.messageContainer.outerHeight(true) : 0));
     }
     
     this.autoResize();
     
     if (typeof autoHeight !== 'undefined') {
-      this.view.prop('autoHeight', autoHeight);
+      this.prop('autoHeight', autoHeight);
     }
   },
   
   autoResize: function () {
-    var autoHeight = this.view.prop('autoHeight');
+    var autoHeight = this.prop('autoHeight');
     
-    if (autoHeight || this.view.prop('labels') === 'separate') {
-      this.resize(autoHeight ? this.fullVisibleHeight : this.view.prop('height'), this.labelTop);
+    if (autoHeight || this.prop('labels') === 'separate') {
+      this.resize(autoHeight ? this.prop('fullVisibleHeight') : this.prop('height'), this.labelTop);
     } else {
       this.toggleExpander();
     }
@@ -238,29 +215,28 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   toggleExpander: function () {
-    if (!this.view.prop('resizable')) {
+    if (!this.prop('resizable')) {
       return;
     }
     
-    var track = this;
-    
-    // Note: this.fullVisibleHeight - this.featureMargin.top - this.featureMargin.bottom is not actually the correct value to test against, but it's the easiest best guess to obtain.
-    // this.fullVisibleHeight is the maximum bottom position of the track's features in the region, which includes margin at the bottom of each feature and label
-    // Therefore this.fullVisibleHeight includes this margin for the bottom-most feature.
+    // Note: fullVisibleHeight - featureMargin.top - featureMargin.bottom is not actually the correct value to test against, but it's the easiest best guess to obtain.
+    // fullVisibleHeight is the maximum bottom position of the track's features in the region, which includes margin at the bottom of each feature and label
+    // Therefore fullVisibleHeight includes this margin for the bottom-most feature.
     // The correct value (for a track using the default positionFeatures code) is:
-    // this.fullVisibleHeight - ([there are labels in this region] ? (this.labels === 'separate' ? 0 : this.featureMargin.bottom + 1) + 2 : this.featureMargin.bottom)
-    if (this.fullVisibleHeight - this.view.prop('featureMargin').top - this.view.prop('featureMargin').bottom > this.view.prop('height')) {
+    // fullVisibleHeight - ([there are labels in this region] ? (labels === 'separate' ? 0 : featureMargin.bottom + 1) + 2 : featureMargin.bottom)
+    if (this.prop('fullVisibleHeight') - this.prop('featureMargin').top - this.prop('featureMargin').bottom > this.prop('height')) {
       this.showMessage('resize');
       
-      var height = this.messageContainer.outerHeight(true);
+      var controller = this;
+      var height     = this.messageContainer.outerHeight(true);
       
-      if (height > this.view.prop('height')) {
+      if (height > this.prop('height')) {
         this.resize(height);
       }
       
       this.expander = (this.expander || $('<div class="expander static">').width(this.width).appendTo(this.container).on('click', function () {
-        track.resize(track.fullVisibleHeight);
-      }))[this.view.prop('height') === 0 ? 'hide' : 'show']();
+        controller.resize(controller.prop('fullVisibleHeight'));
+      }))[this.prop('height') === 0 ? 'hide' : 'show']();
     } else if (this.expander) {
       this.hideMessage('resize');
       this.expander.hide();
@@ -273,14 +249,16 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   setScale: function () {
-    var track  = this;
+    var controller = this;
     
     this.scale = this.browser.scale;
     
     this.track.setMVC();
     this.resetImageRanges();
     
-    if (this.view.prop('labels') && this.view.prop('labels') !== 'overlay') {
+    var labels = this.prop('labels');
+    
+    if (labels && labels !== 'overlay') {
       this.model.setLabelBuffer(this.browser.labelBuffer);
     }
     
@@ -288,7 +266,7 @@ Genoverse.Track.Controller = Base.extend({
       this.thresholdMessage = this.view.formatLabel(this.threshold);
     }
     
-    $.each(this.view.setScaleSettings(this.scale), function (k, v) { track[k] = v; });
+    $.each(this.view.setScaleSettings(this.scale), function (k, v) { controller[k] = v; });
     
     this.hideMessage();
   },
@@ -344,11 +322,11 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   makeImage: function (params) {
-    var track = this;
+    var controller = this;
     
     params.scaledStart   = params.scaledStart   || params.start * params.scale;
     params.width         = params.width         || this.width;
-    params.height        = params.height        || this.view.prop('height');
+    params.height        = params.height        || this.prop('height');
     params.featureHeight = params.featureHeight || 0;
     params.labelHeight   = params.labelHeight   || 0;
     
@@ -367,7 +345,7 @@ Genoverse.Track.Controller = Base.extend({
     this.scrollContainer.append(this.imgContainers);
     
     if (!tooLarge && !this.model.checkDataRange(params.start, params.end)) {
-      var buffer = this.model.prop('dataBuffer');
+      var buffer = this.prop('dataBuffer');
       
       params.start -= buffer.start;
       params.end   += buffer.end;
@@ -376,18 +354,18 @@ Genoverse.Track.Controller = Base.extend({
     
     if (!deferred) {
       deferred = $.Deferred();
-      setTimeout(function () { deferred.resolveWith(track); }, 1); // This defer makes scrolling A LOT smoother, pushing render call to the end of the exec queue
+      setTimeout(function () { deferred.resolveWith(controller); }, 1); // This defer makes scrolling A LOT smoother, pushing render call to the end of the exec queue
     }
     
     return deferred.done(function () {
-      var features = tooLarge ? [] : track.model.findFeatures(params.start, params.end);
-      track.render(features, image);
+      var features = tooLarge ? [] : controller.model.findFeatures(params.start, params.end);
+      controller.render(features, image);
       
       if (bgImage) {
-        track.renderBackground(features, bgImage);
+        controller.renderBackground(features, bgImage);
       }
     }).fail(function (e) {
-      track.showError(e);
+      controller.showError(e);
     });
   },
   
@@ -400,15 +378,15 @@ Genoverse.Track.Controller = Base.extend({
       return this.checkHeight();
     }
     
-    var track   = this;
-    var start   = this.browser.start;
-    var end     = this.browser.end;
-    var length  = this.browser.length;
-    var scale   = this.scale;
-    var cls     = this.scrollStart;
-    var images  = [{ start: start, end: end, scale: scale, cls: cls, left: 0 }];
-    var left    = 0;
-    var width   = this.width;
+    var controller = this;
+    var start      = this.browser.start;
+    var end        = this.browser.end;
+    var length     = this.browser.length;
+    var scale      = this.scale;
+    var cls        = this.scrollStart;
+    var images     = [{ start: start, end: end, scale: scale, cls: cls, left: 0 }];
+    var left       = 0;
+    var width      = this.width;
     
     if (start > 1) {
       images.push({ start: start - length, end: start - 1, scale: scale, cls: cls, left: -this.width });
@@ -425,7 +403,7 @@ Genoverse.Track.Controller = Base.extend({
     
     function makeImages() {
       for (var i = 0; i < images.length; i++) {
-        track.makeImage(images[i]);
+        controller.makeImage(images[i]);
       }
       
       loading.remove();
@@ -435,10 +413,10 @@ Genoverse.Track.Controller = Base.extend({
     if (length > this.threshold || this.model.checkDataRange(start, end)) {
       makeImages();
     } else {
-      var buffer = this.model.prop('dataBuffer');
+      var buffer = this.prop('dataBuffer');
       
       this.model.getData(start - buffer.start - length, end + buffer.end + length).done(makeImages).fail(function (e) {
-        track.showError(e);
+        controller.showError(e);
       });
     }
   },
@@ -447,13 +425,13 @@ Genoverse.Track.Controller = Base.extend({
     var params         = img.data();
         features       = this.view.positionFeatures(this.view.scaleFeatures(features, params.scale), params); // positionFeatures alters params.featureHeight, so this must happen before the canvases are created
     var featureCanvas  = $('<canvas>').attr({ width: params.width, height: params.featureHeight || 1 });
-    var labelCanvas    = this.view.prop('labels') === 'separate' && params.labelHeight ? featureCanvas.clone().attr('height', params.labelHeight) : featureCanvas;
+    var labelCanvas    = this.prop('labels') === 'separate' && params.labelHeight ? featureCanvas.clone().attr('height', params.labelHeight) : featureCanvas;
     var featureContext = featureCanvas[0].getContext('2d');
     var labelContext   = labelCanvas[0].getContext('2d');
     
-    featureContext.font = labelContext.font = this.view.prop('font');
+    featureContext.font = labelContext.font = this.prop('font');
     
-    switch (this.view.prop('labels')) {
+    switch (this.prop('labels')) {
       case false     : break;
       case 'overlay' : labelContext.textAlign = 'center'; labelContext.textBaseline = 'middle'; break;
       default        : labelContext.textAlign = 'left';   labelContext.textBaseline = 'top';    break;
@@ -484,12 +462,12 @@ Genoverse.Track.Controller = Base.extend({
   },
   
   show: function () { // FIXME: move to view
-    this.view.prop('hidden', false);
-    this.resize(this.view.prop('initialHeight'));
+    this.prop('hidden', false);
+    this.resize(this.prop('initialHeight'));
   },
   
   hide: function () { // FIXME: move to view
-    this.view.prop('hidden', true);
+    this.prop('hidden', true);
     this.resize(0);
   },
   

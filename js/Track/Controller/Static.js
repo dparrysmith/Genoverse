@@ -27,11 +27,11 @@ Genoverse.Track.Controller.Static = Genoverse.Track.Controller.extend({
       
       if (this.stringified !== string) {
         params.width         = this.width;
-        params.featureHeight = this.view.prop('height');
+        params.featureHeight = this.prop('height');
         
         this.render(features, this.image.data(params));
         this.imgContainer.children(':last').show();
-        this.resize(this.view.prop('height'));
+        this.resize(this.prop('height'));
         
         this.stringified = string;
       }

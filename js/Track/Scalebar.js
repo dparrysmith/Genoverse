@@ -54,8 +54,8 @@ Genoverse.Track.Scalebar = Genoverse.Track.extend({
     this.track.majorUnit = majorUnit;
     this.track.seen      = {};
     
-    this.model.prop('features', new RTree());
-    this.model.prop('featuresById', {});
+    this.prop('features', new RTree());
+    this.prop('featuresById', {});
     
     this.base();
   },

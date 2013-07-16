@@ -1,4 +1,3 @@
-// FIXME: prop function is duplicated in model and view
 Genoverse.Track.Model = Base.extend({
   dataBuffer : { start: 0, end: 0 }, // basepairs, extend data region for, when getting data from the origin
   xhrFields  : {},
@@ -193,14 +192,6 @@ Genoverse.Track.Model = Base.extend({
   
   findFeatures: function (start, end) {
     return this.features.search({ x: start - this.dataBuffer.start, y: 0, w: end - start + this.dataBuffer.start + this.dataBuffer.end + 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; });
-  },
-  
-  prop: function (key, value) {
-    if (value) {
-      this[key] = value;
-    }
-    
-    return this[key];
   },
   
   abort: function () {

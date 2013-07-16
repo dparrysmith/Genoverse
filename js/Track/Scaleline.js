@@ -8,13 +8,13 @@ Genoverse.Track.Scaleline = Genoverse.Track.Static.extend({
   resize: $.noop,
   
   makeFirstImage: function () {
-    this.view.prop('scaleline', false);
+    this.prop('scaleline', false);
     this.base.apply(this, arguments);
   },
   
   render: function (f, img) {
     this.base(f, img);
-    this.view.prop('drawnScale', img.data('scale'));
+    this.prop('drawnScale', img.data('scale'));
   },
   
   positionFeatures: function (features, params) {
