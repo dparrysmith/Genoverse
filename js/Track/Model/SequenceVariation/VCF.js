@@ -22,7 +22,6 @@ Genoverse.Track.Model.SequenceVariation.VCF = Genoverse.Track.Model.SequenceVari
         
         alleles.unshift(fields[3]);
         
-
         for (var j = 0; j < alleles.length; j++) {
           var end = start + alleles[j].length - 1;
           

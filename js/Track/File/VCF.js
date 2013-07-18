@@ -4,7 +4,7 @@ Genoverse.Track.File.VCF = Genoverse.Track.File.extend({
   
   populateMenu: function (feature) {
     return {
-      title  : '<a target=_blank href="http://www.1000genomes.org/node/101">VCF feature details</a>',
+      title  : '<a target="_blank" href="http://www.1000genomes.org/node/101">VCF feature details</a>',
       CHROM  : feature.originalFeature[0],
       POS    : feature.originalFeature[1],
       ID     : feature.originalFeature[2],
@@ -12,16 +12,16 @@ Genoverse.Track.File.VCF = Genoverse.Track.File.extend({
       ALT    : feature.originalFeature[4],
       QUAL   : feature.originalFeature[5],
       FILTER : feature.originalFeature[6],
-      INFO   : feature.originalFeature[7].split(';').join('<br>')
+      INFO   : feature.originalFeature[7].split(';').join('<br />')
     };
   },
   
   1: { 
     view: Genoverse.Track.View.Sequence.extend({
-      bump           : true,
-      labels         : false,
-      autoHeight     : false,
-      featureMargin  : { top: 0, right: 0, bottom: 0, left: 0 },
+      bump          : true,
+      labels        : false,
+      autoHeight    : false,
+      featureMargin : { top: 0, right: 0, bottom: 0, left: 0 },
       
       draw: function (features, featureContext, labelContext, scale) {
         this.base.apply(this, arguments);
