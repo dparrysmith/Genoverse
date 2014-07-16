@@ -7969,7 +7969,7 @@ Genoverse.Track.Controller = Base.extend({
   messages     : {
     error     : 'ERROR: ',
     threshold : 'Data for this track is not displayed in regions greater than ',
-    resize    : 'Some features are currently hidden, resize to see all'
+    resize    : 'Some features are currently hidden, <a class="resize">resize to see all</a>'
   },
   
   constructor: function (properties) {
@@ -8086,7 +8086,14 @@ Genoverse.Track.Controller = Base.extend({
     var messages = this.messageContainer.children('.messages');
     
     if (!messages.children('.' + code).show().length) {
-      messages.prepend('<div class="msg ' + code + '">' + this.messages[code] + (additionalText || '') + '</div>');
+      var msg = $('<div class="msg ' + code + '">' + this.messages[code] + (additionalText || '') + '</div>').prependTo(messages);
+      
+      if (code === 'resize') {
+        msg.children('a.resize').on('click', $.proxy(function () {
+          this.resize(this.fullVisibleHeight);
+        }, this));
+      }
+      
       this.messageContainer[document.cookie.match([ 'gv_msg', code, this.prop('id') ].join('_') + '=1') ? 'addClass' : 'removeClass']('collapsed');
     }
     
@@ -8365,15 +8372,17 @@ Genoverse.Track.Controller = Base.extend({
     var left       = 0;
     var width      = this.width;
     
-    if (start > 1) {
-      images.push({ start: start - length, end: start - 1, scale: scale, cls: cls, left: -this.width });
-      left   = -this.width;
-      width += this.width;
-    }
-    
-    if (end < this.browser.chromosomeSize) {
-      images.push({ start: end + 1, end: end + length, scale: scale, cls: cls, left: this.width });
-      width += this.width;
+    if (!this.browser.isStatic) {
+      if (start > 1) {
+        images.push({ start: start - length, end: start - 1, scale: scale, cls: cls, left: -this.width });
+        left   = -this.width;
+        width += this.width;
+      }
+      
+      if (end < this.browser.chromosomeSize) {
+        images.push({ start: end + 1, end: end + length, scale: scale, cls: cls, left: this.width });
+        width += this.width;
+      }
     }
     
     var loading = this.imgContainer.clone().addClass('loading').css({ left: left, width: width }).prependTo(this.scrollContainer.css('left', 0));
@@ -9990,9 +9999,10 @@ Genoverse.Track.Model.Sequence.Fasta = Genoverse.Track.Model.Sequence.extend({
 
 
 Genoverse.Track.Model.Sequence.Ensembl = Genoverse.Track.Model.Sequence.extend({
-  url              : 'http://beta.rest.ensembl.org/sequence/region/human/__CHR__:__START__-__END__?content-type=text/plain', // Example url
+  url              : '//rest.ensembl.org/sequence/region/human/__CHR__:__START__-__END__?content-type=text/plain', // Example url
   dataRequestLimit : 10000000 // As per e! REST API restrictions
 });
+
 
 
 
@@ -10191,18 +10201,17 @@ Genoverse.Track.Model.Gene = Genoverse.Track.Model.extend({
 
 // Ensembl REST API Gene model
 Genoverse.Track.Model.Gene.Ensembl = Genoverse.Track.Model.Gene.extend({
-  url              : 'http://beta.rest.ensembl.org/feature/region/human/__CHR__:__START__-__END__?feature=gene;content-type=application/json',
+  url              : '//rest.ensembl.org/overlap/region/human/__CHR__:__START__-__END__?feature=gene;content-type=application/json',
   dataRequestLimit : 5000000, // As per e! REST API restrictions
   
   // The url above responds in json format, data is an array
   // We assume that parents always preceed children in data array, gene -> transcript -> exon
-  // See http://beta.rest.ensembl.org/documentation/info/feature_region for more details
+  // See rest.ensembl.org/documentation/info/feature_region for more details
   parseData: function (data) {
     for (var i = 0; i < data.length; i++) {
       var feature = data[i];
       
-      if (feature.feature_type === 'gene' && !this.featuresById[feature.ID]) {
-        feature.id          = feature.ID;
+      if (feature.feature_type === 'gene' && !this.featuresById[feature.id]) {
         feature.label       = feature.external_name || feature.id;
         feature.transcripts = [];
         
@@ -10259,25 +10268,22 @@ Genoverse.Track.Model.Transcript = Genoverse.Track.Model.extend({
 
 // Ensembl REST API Transcript model
 Genoverse.Track.Model.Transcript.Ensembl = Genoverse.Track.Model.Transcript.extend({
-  url              : 'http://beta.rest.ensembl.org/feature/region/human/__CHR__:__START__-__END__?feature=transcript;feature=exon;feature=cds;content-type=application/json',
+  url              : '//rest.ensembl.org/overlap/region/human/__CHR__:__START__-__END__?feature=transcript;feature=exon;feature=cds;content-type=application/json',
   dataRequestLimit : 5000000, // As per e! REST API restrictions
   
   // The url above responds in json format, data is an array
-  // See http://beta.rest.ensembl.org/documentation/info/feature_region for more details
+  // See rest.ensembl.org/documentation/info/feature_region for more details
   parseData: function (data) {
     for (var i = 0; i < data.length; i++) {
       var feature = data[i];
       
-      if (feature.feature_type === 'transcript' && !this.featuresById[feature.ID]) {
-        feature.id    = feature.ID;
+      if (feature.feature_type === 'transcript' && !this.featuresById[feature.id]) {
         feature.label = feature.id;
         feature.exons = [];
         feature.cds   = [];
         
         this.insertFeature(feature);
       } else if (feature.feature_type === 'exon' && this.featuresById[feature.Parent]) {
-        feature.id = feature.ID;
-        
         if (!this.featuresById[feature.Parent].exons[feature.id]) {
           this.featuresById[feature.Parent].exons.push(feature);
           this.featuresById[feature.Parent].exons[feature.id] = feature;
